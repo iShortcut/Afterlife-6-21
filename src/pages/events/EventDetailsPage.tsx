@@ -64,6 +64,11 @@ const EventDetailsPage = () => {
         return `${format(startDate, baseFormat)} to ${format(endDate, "h:mm a")}`;
     };
 
+    // Create Google Maps search URL for the location
+    const getGoogleMapsUrl = (location: string) => {
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+    };
+
     return (
         <div className="max-w-4xl mx-auto my-8">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -80,9 +85,38 @@ const EventDetailsPage = () => {
                         <div className="mt-4 space-y-3 text-gray-600">
                            <div className="flex items-center"><Tag size={16} className="mr-3 text-gray-400" /><span>Gravestone Unveiling</span></div>
                             <div className="flex items-center"><Calendar size={16} className="mr-3 text-gray-400" /><span>{formatEventDate(event.start_time, event.end_time)}</span></div>
-                            <div className="flex items-center"><MapPin size={16} className="mr-3 text-gray-400" /><span>{event.location_text}</span></div>
-                            {event.memorial && (<div className="flex items-center"><LinkIcon size={16} className="mr-3 text-gray-400" /><span>Part of: <Link to={`/memorials/${event.memorial.id}`} className="text-indigo-600 hover:underline">{event.memorial.title}</Link></span></div>)}
-                            <div className="flex items-center"><User size={16} className="mr-3 text-gray-400" /><span>Organized by: {event.creator?.full_name}</span></div>
+                            <div className="flex items-center">
+                                <MapPin size={16} className="mr-3 text-gray-400" />
+                                {event.location_text ? (
+                                    <a 
+                                        href={getGoogleMapsUrl(event.location_text)} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline"
+                                    >
+                                        {event.location_text}
+                                    </a>
+                                ) : (
+                                    <span>No location specified</span>
+                                )}
+                            </div>
+                            {event.memorial && (
+                                <div className="flex items-center">
+                                    <LinkIcon size={16} className="mr-3 text-gray-400" />
+                                    <span>Part of: <Link to={`/memorials/${event.memorial.id}`} className="text-blue-600 hover:underline">{event.memorial.title}</Link></span>
+                                </div>
+                            )}
+                            <div className="flex items-center">
+                                <User size={16} className="mr-3 text-gray-400" />
+                                <span>Organized by: {event.creator ? (
+                                    <Link to={`/profile/${event.creator.id}`} className="text-blue-600 hover:underline">
+                                        {event.creator.full_name}
+                                    </Link>
+                                ) : (
+                                    'Unknown'
+                                )}
+                                </span>
+                            </div>
                         </div>
                     </section>
 
