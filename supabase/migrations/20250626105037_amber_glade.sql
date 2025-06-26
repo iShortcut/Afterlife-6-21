@@ -1,165 +1,78 @@
-/*
-  # Create Event Media Storage Bucket and Policies
-
-  1. New Storage Bucket
-    - Creates 'event_media' bucket for storing event-related media files
-    - Sets 50MB file size limit
-    - Restricts to common image and video formats
-
-  2. Security
-    - Enables Row Level Security on storage.objects
-    - Creates policies for read, insert, update, and delete operations
-    - Adds helper functions for path parsing and access control
-*/
+-- [FINAL-FIX] Simplifies RLS policies by using a helper function to prevent syntax errors.
 
 -- Create the event_media bucket if it doesn't exist
 INSERT INTO storage.buckets (id, name, public, avif_autodetection, file_size_limit, allowed_mime_types)
 VALUES (
   'event_media',
   'event_media',
-  true,  -- public bucket
-  false, -- no avif autodetection
+  true,
+  false,
   52428800, -- 50MB limit
-  ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'video/mp4', 'video/webm']::text[]
+  ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'video/mp4', 'video/webm']
 )
 ON CONFLICT (id) DO NOTHING;
 
--- Enable Row Level Security
+-- Enable Row Level Security on storage objects
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
--- Policy 1: Allow public read access for event media
+-- 1. Create a helper function to reliably get the event ID from a storage path
+DROP FUNCTION IF EXISTS public.get_event_id_from_storage_path(text);
+CREATE OR REPLACE FUNCTION public.get_event_id_from_storage_path(path text)
+RETURNS uuid
+LANGUAGE sql
+IMMUTABLE -- Changed to IMMUTABLE as the function is deterministic
+AS $$
+  -- Correctly wrapped regexp_match to prevent syntax error
+  SELECT (regexp_match(path, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]::uuid;
+$$;
+
+-- 2. Create simplified and correct RLS policies using the helper function
+
+-- Policy for Public Read Access
+DROP POLICY IF EXISTS "Allow public read access for event media" ON storage.objects;
 CREATE POLICY "Allow public read access for event media"
 ON storage.objects FOR SELECT
 TO public
 USING (
   bucket_id = 'event_media' AND (
-    -- Check if the event is public
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id = (
-        -- [FIXED] Wrapped regexp_match in parentheses
-        (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
-      )::uuid
+      WHERE e.id = public.get_event_id_from_storage_path(storage.objects.name)
       AND e.visibility = 'public'
     )
-    OR
-    -- Or allow access to any authenticated user
-    auth.role() = 'authenticated'
   )
 );
 
--- Policy 2: Allow event owner to upload/update their media
-CREATE POLICY "Allow event owner to upload/update their media"
-ON storage.objects FOR INSERT
+-- Policy for Authenticated Users (Covers INSERT, UPDATE, DELETE)
+DROP POLICY IF EXISTS "Allow event owner to manage their media" ON storage.objects;
+CREATE POLICY "Allow event owner to manage their media"
+ON storage.objects FOR ALL
 TO authenticated
+USING (
+  bucket_id = 'event_media' AND (
+    EXISTS (
+      SELECT 1 FROM public.events e
+      WHERE e.id = public.get_event_id_from_storage_path(storage.objects.name)
+      AND e.creator_id = auth.uid()
+    )
+    OR
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'ADMIN'
+    )
+  )
+)
 WITH CHECK (
   bucket_id = 'event_media' AND (
-    -- Check if user is the event creator
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id = (
-        -- [FIXED] Wrapped regexp_match in parentheses
-        (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
-      )::uuid
+      WHERE e.id = public.get_event_id_from_storage_path(storage.objects.name)
       AND e.creator_id = auth.uid()
     )
     OR
-    -- Or check if user is an admin
     EXISTS (
       SELECT 1 FROM public.profiles p
       WHERE p.id = auth.uid() AND p.role = 'ADMIN'
     )
   )
 );
-
--- Policy 3: Allow event owner to update their media
-CREATE POLICY "Allow event owner to update their media"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (
-  bucket_id = 'event_media' AND (
-    -- Check if user is the event creator
-    EXISTS (
-      SELECT 1 FROM public.events e
-      WHERE e.id = (
-        -- [FIXED] Wrapped regexp_match in parentheses
-        (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
-      )::uuid
-      AND e.creator_id = auth.uid()
-    )
-    OR
-    -- Or check if user is an admin
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid() AND p.role = 'ADMIN'
-    )
-  )
-);
-
--- Policy 4: Allow event owner to delete their media
-CREATE POLICY "Allow event owner to delete their media"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (
-  bucket_id = 'event_media' AND (
-    -- Check if user is the event creator
-    EXISTS (
-      SELECT 1 FROM public.events e
-      WHERE e.id = (
-        -- [FIXED] Wrapped regexp_match in parentheses
-        (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
-      )::uuid
-      AND e.creator_id = auth.uid()
-    )
-    OR
-    -- Or check if user is an admin
-    EXISTS (
-      SELECT 1 FROM public.profiles p
-      WHERE p.id = auth.uid() AND p.role = 'ADMIN'
-    )
-  )
-);
-
--- Create a helper function to get the event ID from a storage path
-CREATE OR REPLACE FUNCTION public.get_event_id_from_storage_path(path text)
-RETURNS uuid
-LANGUAGE sql
-SECURITY DEFINER
-AS $$
-  -- [FIXED] Wrapped regexp_match in parentheses
-  SELECT ((regexp_match(path, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1])::uuid;
-$$;
-
--- Create a helper function to check if a user can access an event's media
-CREATE OR REPLACE FUNCTION public.can_access_event_media(event_id uuid, user_id uuid)
-RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  event_visibility text;
-  event_creator_id uuid;
-  is_attendee boolean;
-BEGIN
-  -- Get event details
-  SELECT e.visibility, e.creator_id
-  INTO event_visibility, event_creator_id
-  FROM public.events e
-  WHERE e.id = event_id;
-  
-  -- Check if user is an attendee
-  SELECT EXISTS (
-    SELECT 1 FROM public.event_attendees ea
-    WHERE ea.event_id = event_id AND ea.user_id = user_id
-  ) INTO is_attendee;
-  
-  -- Return true if:
-  -- 1. Event is public, OR
-  -- 2. User is the event creator, OR
-  -- 3. User is an attendee
-  RETURN 
-    event_visibility = 'public' OR
-    event_creator_id = user_id OR
-    is_attendee;
-END;
-$$;
