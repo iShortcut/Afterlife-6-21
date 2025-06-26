@@ -2,27 +2,42 @@ import React from 'react';
 import { ImageIcon } from 'lucide-react';
 
 interface EventCoverImageDisplayProps {
-  coverImageUrl?: string | null;
+  heroMediaUrl?: string | null;
+  heroMediaType?: 'image' | 'video' | 'default' | null;
   eventName?: string; // For alt text
   className?: string; // For additional styling, e.g., height constraints
   placeholderStyle?: 'icon' | 'pattern' | 'none'; // To control placeholder appearance
 }
 
 const EventCoverImageDisplay: React.FC<EventCoverImageDisplayProps> = ({
-  coverImageUrl,
+  heroMediaUrl,
+  heroMediaType = 'default',
   eventName = "Event",
   className = "w-full h-64 object-cover rounded-lg shadow-md", // Default for a details page banner
   placeholderStyle = 'icon'
 }) => {
-  if (coverImageUrl) {
-    return (
-      <img
-        src={coverImageUrl}
-        alt={`Cover image for ${eventName}`}
-        className={className}
-        onError={(e) => (e.currentTarget.style.display = 'none')} // Simple error handling: hide if broken
-      />
-    );
+  if (heroMediaUrl) {
+    if (heroMediaType === 'video') {
+      return (
+        <video
+          src={heroMediaUrl}
+          controls
+          className={className}
+          title={`Video for ${eventName}`}
+          onError={(e) => (e.currentTarget.style.display = 'none')} // Simple error handling
+        />
+      );
+    } else {
+      // Default to image
+      return (
+        <img
+          src={heroMediaUrl}
+          alt={`Cover image for ${eventName}`}
+          className={className}
+          onError={(e) => (e.currentTarget.style.display = 'none')} // Simple error handling
+        />
+      );
+    }
   }
 
   if (placeholderStyle === 'none') {
