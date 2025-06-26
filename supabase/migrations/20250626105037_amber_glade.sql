@@ -1,3 +1,6 @@
+-- [DEBUG] Update confirmed @ 2025-06-26 22:00
+
+
 -- [FINAL-FIX] Simplifies RLS policies by using a helper function to prevent syntax errors.
 
 -- Create the event_media bucket if it doesn't exist
