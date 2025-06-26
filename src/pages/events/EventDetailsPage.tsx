@@ -22,7 +22,7 @@ import {
 const fetchEventDetails = async (eventId: string) => {
     const { data, error } = await supabase
         .from('events')
-        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title)`)
+        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title), deceased_description`)
         .eq('id', eventId)
         .single();
     if (error) { console.error(error); return null; }
@@ -85,6 +85,16 @@ const EventDetailsPage = () => {
                             <div className="flex items-center"><User size={16} className="mr-3 text-gray-400" /><span>Organized by: {event.creator?.full_name}</span></div>
                         </div>
                     </section>
+
+                    {/* --- Deceased Description Section --- */}
+                    {event.deceased_description && (
+                        <section className="border-t pt-6">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-3">About the Deceased</h2>
+                            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{event.deceased_description}</p>
+                            </div>
+                        </section>
+                    )}
 
                     {/* --- Details Section --- */}
                     <section className="border-t pt-6">

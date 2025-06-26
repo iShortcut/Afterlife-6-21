@@ -230,6 +230,7 @@ export interface Event {
   organization_id: string | null;
   status: 'draft' | 'published' | 'cancelled';
   tags?: string[];
+  deceased_description?: string | null;
   creator?: {
     id: string;
     full_name?: string | null;
