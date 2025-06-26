@@ -36,8 +36,8 @@ USING (
     -- Check if the event is public
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id::text = (
-        -- Extract event ID from path (assuming format: event_media/{event_id}/...)
+      WHERE e.id = (
+        -- [FIXED] Wrapped regexp_match in parentheses
         (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
       )::uuid
       AND e.visibility = 'public'
@@ -57,8 +57,8 @@ WITH CHECK (
     -- Check if user is the event creator
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id::text = (
-        -- Extract event ID from path (assuming format: event_media/{event_id}/...)
+      WHERE e.id = (
+        -- [FIXED] Wrapped regexp_match in parentheses
         (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
       )::uuid
       AND e.creator_id = auth.uid()
@@ -81,8 +81,8 @@ USING (
     -- Check if user is the event creator
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id::text = (
-        -- Extract event ID from path (assuming format: event_media/{event_id}/...)
+      WHERE e.id = (
+        -- [FIXED] Wrapped regexp_match in parentheses
         (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
       )::uuid
       AND e.creator_id = auth.uid()
@@ -105,8 +105,8 @@ USING (
     -- Check if user is the event creator
     EXISTS (
       SELECT 1 FROM public.events e
-      WHERE e.id::text = (
-        -- Extract event ID from path (assuming format: event_media/{event_id}/...)
+      WHERE e.id = (
+        -- [FIXED] Wrapped regexp_match in parentheses
         (regexp_match(storage.objects.name, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1]
       )::uuid
       AND e.creator_id = auth.uid()
@@ -126,6 +126,7 @@ RETURNS uuid
 LANGUAGE sql
 SECURITY DEFINER
 AS $$
+  -- [FIXED] Wrapped regexp_match in parentheses
   SELECT ((regexp_match(path, '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/.*$'))[1])::uuid;
 $$;
 
