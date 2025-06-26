@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, Calendar } from 'lucide-react';
 
 interface EventCoverImageDisplayProps {
   heroMediaUrl?: string | null;
@@ -44,14 +44,19 @@ const EventCoverImageDisplay: React.FC<EventCoverImageDisplayProps> = ({
     return null;
   }
 
-  // Placeholder (consistent with other placeholders in the app)
+  // Custom placeholder with AfterLife aesthetic
   return (
     <div
-      className={`${className} bg-gray-200 dark:bg-gray-700 flex items-center justify-center`}
+      className={`${className} bg-gradient-to-r from-indigo-50 to-blue-50 flex flex-col items-center justify-center`}
       aria-label="No cover image available"
     >
       {placeholderStyle === 'icon' && (
-        <ImageIcon className="h-16 w-16 text-gray-400 dark:text-gray-500" />
+        <>
+          <Calendar className="h-16 w-16 text-indigo-300 mb-2" />
+          <div className="text-indigo-400 text-sm font-medium">
+            {eventName}
+          </div>
+        </>
       )}
     </div>
   );

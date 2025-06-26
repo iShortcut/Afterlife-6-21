@@ -1,11 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { Image as ImageIcon, X } from 'lucide-react';
+import { Image as ImageIcon, X, Upload, Loader2 } from 'lucide-react';
 import { Control, Controller } from 'react-hook-form';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { uploadFile, generateFilePath } from '../../utils/storage';
+import toast from 'react-hot-toast';
 
 interface EventCoverImageUploadProps {
   control: Control<any>;
   name: string;
   initialPreviewUrl?: string | null;
+  eventId?: string | null;
   label?: string;
   error?: string;
 }
@@ -14,36 +19,116 @@ const EventCoverImageUpload: React.FC<EventCoverImageUploadProps> = ({
   control,
   name,
   initialPreviewUrl = null,
+  eventId = null,
   label = "Cover Image (optional)",
   error
 }) => {
-  const handleFileChange = (
+  const { user } = useAuth();
+  const [preview, setPreview] = useState<string | null>(initialPreviewUrl);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileChange = async (
     onChange: (file: File | null) => void,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = e.target.files?.[0] || null;
-    onChange(file);
     
-    // Create preview URL if file exists
-    if (file) {
+    if (!file) {
+      onChange(null);
+      setPreview(null);
+      return;
+    }
+
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size exceeds the 10MB limit');
+      return;
+    }
+
+    // Check file type
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      toast.error('Only image files (JPEG, PNG, GIF, WEBP) are supported');
+      return;
+    }
+
+    // If we have an eventId, upload directly to storage
+    if (eventId && user) {
+      try {
+        setIsUploading(true);
+        
+        // Generate file path
+        const filePath = generateFilePath(eventId, file);
+        
+        // Upload to event_media bucket
+        const publicUrl = await uploadFile('event_media', filePath, file, {
+          onProgress: setUploadProgress,
+          upsert: true
+        });
+        
+        // Update the event record with the new hero media URL and type
+        const { error: updateError } = await supabase
+          .from('events')
+          .update({
+            hero_media_url: publicUrl,
+            hero_media_type: 'image'
+          })
+          .eq('id', eventId);
+          
+        if (updateError) throw updateError;
+        
+        // Create media record
+        const { error: mediaError } = await supabase
+          .from('media')
+          .insert({
+            uploader_id: user.id,
+            storage_path: filePath,
+            entity_type: 'event',
+            entity_id: eventId,
+            metadata: {
+              file_name: file.name,
+              file_size: file.size,
+              file_type: file.type,
+              media_type: 'image'
+            }
+          });
+          
+        if (mediaError) {
+          console.error('Error creating media record:', mediaError);
+          // Don't throw here, as the upload was successful
+        }
+        
+        // Update preview and form value
+        setPreview(publicUrl);
+        onChange(file);
+        
+        toast.success('Cover image uploaded successfully');
+      } catch (err) {
+        console.error('Error uploading cover image:', err);
+        toast.error('Failed to upload cover image');
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    } else {
+      // Just store the file in the form state for later upload
+      onChange(file);
+      
+      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    } else {
-      setPreview(null);
     }
   };
-
-  const [preview, setPreview] = useState<string | null>(initialPreviewUrl);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDrop = (
+  const handleDrop = async (
     onChange: (file: File | null) => void,
     e: React.DragEvent<HTMLDivElement>
   ) => {
@@ -52,19 +137,113 @@ const EventCoverImageUpload: React.FC<EventCoverImageUploadProps> = ({
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      onChange(file);
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size exceeds the 10MB limit');
+        return;
+      }
+
+      // Check file type
+      if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+        toast.error('Only image files (JPEG, PNG, GIF, WEBP) are supported');
+        return;
+      }
+
+      // If we have an eventId, upload directly to storage
+      if (eventId && user) {
+        try {
+          setIsUploading(true);
+          
+          // Generate file path
+          const filePath = generateFilePath(eventId, file);
+          
+          // Upload to event_media bucket
+          const publicUrl = await uploadFile('event_media', filePath, file, {
+            onProgress: setUploadProgress,
+            upsert: true
+          });
+          
+          // Update the event record with the new hero media URL and type
+          const { error: updateError } = await supabase
+            .from('events')
+            .update({
+              hero_media_url: publicUrl,
+              hero_media_type: 'image'
+            })
+            .eq('id', eventId);
+            
+          if (updateError) throw updateError;
+          
+          // Create media record
+          const { error: mediaError } = await supabase
+            .from('media')
+            .insert({
+              uploader_id: user.id,
+              storage_path: filePath,
+              entity_type: 'event',
+              entity_id: eventId,
+              metadata: {
+                file_name: file.name,
+                file_size: file.size,
+                file_type: file.type,
+                media_type: 'image'
+              }
+            });
+            
+          if (mediaError) {
+            console.error('Error creating media record:', mediaError);
+            // Don't throw here, as the upload was successful
+          }
+          
+          // Update preview and form value
+          setPreview(publicUrl);
+          onChange(file);
+          
+          toast.success('Cover image uploaded successfully');
+        } catch (err) {
+          console.error('Error uploading cover image:', err);
+          toast.error('Failed to upload cover image');
+        } finally {
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
+      } else {
+        // Just store the file in the form state for later upload
+        onChange(file);
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
   const removeImage = (onChange: (file: File | null) => void) => {
     setPreview(null);
     onChange(null);
+    
+    // If we have an eventId, update the event record to clear the hero media
+    if (eventId) {
+      supabase
+        .from('events')
+        .update({
+          hero_media_url: null,
+          hero_media_type: 'default'
+        })
+        .eq('id', eventId)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error clearing hero media:', error);
+            toast.error('Failed to clear cover image');
+          } else {
+            toast.success('Cover image removed');
+          }
+        });
+    }
   };
 
   return (
@@ -85,13 +264,22 @@ const EventCoverImageUpload: React.FC<EventCoverImageUploadProps> = ({
                   alt="Cover preview" 
                   className="max-h-48 w-full object-cover rounded-md"
                 />
-                <button
-                  type="button"
-                  onClick={() => removeImage(onChange)}
-                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-rose-100"
-                >
-                  <X size={16} className="text-rose-600" />
-                </button>
+                {isUploading ? (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <Loader2 size={24} className="animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Uploading... {uploadProgress}%</p>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => removeImage(onChange)}
+                    className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-rose-100"
+                  >
+                    <X size={16} className="text-rose-600" />
+                  </button>
+                )}
               </div>
             ) : (
               <div
@@ -108,7 +296,7 @@ const EventCoverImageUpload: React.FC<EventCoverImageUploadProps> = ({
                     </p>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-gray-500">
-                    PNG, JPG, WEBP up to 2MB
+                    PNG, JPG, WEBP up to 10MB
                   </p>
                 </div>
               </div>
@@ -120,6 +308,7 @@ const EventCoverImageUpload: React.FC<EventCoverImageUploadProps> = ({
               accept="image/*"
               className="sr-only"
               onChange={(e) => handleFileChange(onChange, e)}
+              disabled={isUploading}
               {...field}
             />
           </>

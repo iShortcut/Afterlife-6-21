@@ -13,6 +13,8 @@ import { useEventAttendees } from '@/hooks/useEventAttendees';
 import { RsvpControlBar } from '@/components/events/RsvpControlBar';
 import { PersonalStatusDisplay } from '@/components/events/PersonalStatusDisplay';
 import { AttendeesList } from '@/components/events/AttendeesList';
+import EventCoverImageDisplay from '@/components/events/EventCoverImageDisplay';
+import EventMediaGallery from '@/components/events/EventMediaGallery';
 import { Event, EventAttendee } from '@/types';
 import { format } from 'date-fns';
 import { 
@@ -22,7 +24,7 @@ import {
 const fetchEventDetails = async (eventId: string) => {
     const { data, error } = await supabase
         .from('events')
-        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title), deceased_description`)
+        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title), deceased_description, hero_media_url, hero_media_type`)
         .eq('id', eventId)
         .single();
     if (error) { console.error(error); return null; }
@@ -72,9 +74,14 @@ const EventDetailsPage = () => {
     return (
         <div className="max-w-4xl mx-auto my-8">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="h-64 bg-gray-200 flex items-center justify-center">
-                    <Calendar size={48} className="text-gray-400" />
-                </div>
+                {/* Hero Media Section */}
+                <EventCoverImageDisplay 
+                    heroMediaUrl={event.hero_media_url} 
+                    heroMediaType={event.hero_media_type}
+                    eventName={event.title}
+                    className="w-full h-64 object-cover"
+                />
+                
                 <div className="p-6 space-y-8">
                     {/* --- Header Section --- */}
                     <section>
@@ -136,6 +143,14 @@ const EventDetailsPage = () => {
                         <p className="text-gray-700 whitespace-pre-wrap">{event.description}</p>
                     </section>
 
+                    {/* --- Media Gallery Section --- */}
+                    <section className="border-t pt-6">
+                        <EventMediaGallery 
+                            eventId={eventId!} 
+                            isOwner={isManager || (user && event.creator_id === user.id)}
+                        />
+                    </section>
+
                     {/* --- Actions Section --- */}
                     <section className="border-t pt-6 space-y-6">
                         {/* Share / Invite / Manage */}
@@ -160,7 +175,7 @@ const EventDetailsPage = () => {
                     <section className="border-t pt-6">
                         {currentUserAttendee ? (
                             <div className="space-y-6">
-                                <RsvpControlBar eventId={eventId} currentUser={currentUserAttendee} />
+                                <RsvpControlBar eventId={eventId!} currentUser={currentUserAttendee} />
                                 <PersonalStatusDisplay attendee={currentUserAttendee} />
                             </div>
                         ) : ( user ?
@@ -169,7 +184,7 @@ const EventDetailsPage = () => {
                         )}
                     </section>
                     <section className="border-t pt-6">
-                        <AttendeesList eventId={eventId} currentUserId={user?.id} />
+                        <AttendeesList eventId={eventId!} currentUserId={user?.id} />
                     </section>
                 </div>
             </div>
