@@ -46,10 +46,9 @@ const FloatingEventsTab = () => {
             )
         );
         try {
-            const { error: rpcError } = await supabase.rpc('upsert_event_rsvp', {
-                p_event_id: eventId,
-                p_user_profile_id: user.id, // Using correct parameter
-                p_rsvp_status: newStatus
+            const { error: rpcError } = await supabase.rpc('update-rsvp-status', {
+                event_id_input: eventId,
+                new_status: newStatus
             });
             if (rpcError) throw rpcError;
             toast.success('RSVP updated!');

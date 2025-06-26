@@ -35,8 +35,8 @@ const EventListItem: React.FC<EventListItemProps> = ({ event, className = '', on
     return <div className={`flex items-center gap-1.5 text-xs font-medium ${colors}`}><IconComponent size={14} /><span>{rsvpText}</span></div>;
   };
 
-  const canEditEvent = user && event.creator_id === user.id; // FIXED: Changed event.creator_user_id to event.creator_id
-  const showRsvpControls = (event.user_rsvp_status !== null || event.visibility === 'public') && event.status === 'published'; // FIXED: Changed event.event_status to event.status
+  const canEditEvent = user && event.creator_id === user.id;
+  const showRsvpControls = (event.user_rsvp_status !== null || event.visibility === 'public') && event.event_status === 'published';
 
   return (
     <div className={`bg-white dark:bg-gray-750 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-3 ${className}`}>

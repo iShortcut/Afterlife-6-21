@@ -226,7 +226,8 @@ export interface Event {
   memorial_id: string | null;
   event_type_id: string | null;
   location_type: 'physical' | 'online';
-  cover_image_url: string | null;
+  hero_media_url: string | null;
+  hero_media_type: 'image' | 'video' | 'default' | null;
   organization_id: string | null;
   status: 'draft' | 'published' | 'cancelled';
   tags?: string[];
@@ -248,6 +249,17 @@ export interface Event {
   } | null;
 }
 
+// For the FloatingEventsTab component
+export interface EventWithRsvp extends Event {
+  user_rsvp_status: RsvpStatus;
+  memorial_title?: string;
+  memorial_cover_image_url?: string;
+  creator_name?: string;
+  creator_avatar_url?: string;
+  event_type_name?: string;
+  attendee_count?: number;
+}
+
 // ==================================================================
 // START OF NEW/UPDATED TYPES FOR RSVP FEATURE
 // ==================================================================
@@ -258,7 +270,7 @@ export interface Event {
  * `null` represents a user who has not yet responded.
  * Note: 'accepted' will be displayed as 'Going' in the UI.
  */
-export type RSVPStatus = "accepted" | "maybe" | "declined" | "invited" | null;
+export type RsvpStatus = "accepted" | "maybe" | "declined" | "invited" | null;
 
 /**
  * Represents a single attendee of an event, including their profile information.
@@ -270,12 +282,13 @@ export interface EventAttendee {
   event_id: string;
   user_id: string;
   role: 'manager' | 'participant';
-  status: RSVPStatus; // This is the attendee's RSVP status
+  status: RsvpStatus; // This is the attendee's RSVP status
   responded_at: string | null;
   created_at: string;
   updated_at: string;
   invited_by: string | null;
   guest_email: string | null;
+  rsvp: RsvpStatus;
   // This nested object contains the attendee's public profile information
   profiles: {
     id: string;
