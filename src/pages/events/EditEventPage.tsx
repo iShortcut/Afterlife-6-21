@@ -13,7 +13,6 @@ import { AttendeesList } from '@/components/events/AttendeesList';
 import EventEditForm from '@/components/events/EventEditForm';
 import EventCoverImageDisplay from '@/components/events/EventCoverImageDisplay';
 import EventMediaGallery from '@/components/events/EventMediaGallery';
-import EventDetailedInfoDisplay from '@/components/events/EventDetailedInfoDisplay';
 import { Event } from '@/types';
 import { ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -22,7 +21,7 @@ import Button from '@/components/ui/Button';
 const fetchEventForEdit = async (eventId: string) => {
     const { data, error } = await supabase
         .from('events')
-        .select('*, creator:profiles!creator_id (*), memorial:memorials (id, title), hero_media_url, hero_media_type, detailed_event_info')
+        .select('*, creator:profiles!creator_id (*), memorial:memorials (id, title), hero_media_url, hero_media_type')
         .eq('id', eventId)
         .single();
     if (error) {
@@ -91,14 +90,6 @@ const EditEventPage = () => {
 
             {/* The form now receives the eventId and fetches its own data, which is a robust pattern */}
             <EventEditForm eventId={eventId!} />
-
-            {/* Detailed Event Info Section */}
-            {event.detailed_event_info && Object.keys(event.detailed_event_info).length > 0 && (
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold mb-4">Detailed Event Information</h2>
-                    <EventDetailedInfoDisplay detailedInfo={event.detailed_event_info} />
-                </div>
-            )}
 
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Event Media</h2>

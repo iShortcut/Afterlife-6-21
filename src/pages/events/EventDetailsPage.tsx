@@ -15,7 +15,6 @@ import { PersonalStatusDisplay } from '@/components/events/PersonalStatusDisplay
 import { AttendeesList } from '@/components/events/AttendeesList';
 import EventCoverImageDisplay from '@/components/events/EventCoverImageDisplay';
 import EventMediaGallery from '@/components/events/EventMediaGallery';
-import EventDetailedInfoDisplay from '@/components/events/EventDetailedInfoDisplay';
 import { Event, EventAttendee } from '@/types';
 import { format } from 'date-fns';
 import { 
@@ -25,7 +24,7 @@ import {
 const fetchEventDetails = async (eventId: string) => {
     const { data, error } = await supabase
         .from('events')
-        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title), deceased_description, hero_media_url, hero_media_type, detailed_event_info`)
+        .select(`*, creator:profiles!creator_id (*), memorial:memorials (id, title), deceased_description, hero_media_url, hero_media_type`)
         .eq('id', eventId)
         .single();
     if (error) { console.error(error); return null; }
@@ -140,18 +139,9 @@ const EventDetailsPage = () => {
 
                     {/* --- Details Section --- */}
                     <section className="border-t pt-6">
-                        <h2 className="font-bold text-lg mb-2 text-gray-800">Event Description</h2>
+                        <h2 className="font-bold text-lg mb-2 text-gray-800">Event Details</h2>
                         <p className="text-gray-700 whitespace-pre-wrap">{event.description}</p>
                     </section>
-
-                    {/* --- Detailed Event Info Section --- */}
-                    {event.detailed_event_info && Object.keys(event.detailed_event_info).length > 0 && (
-                        <section className="border-t pt-6">
-                            <EventDetailedInfoDisplay 
-                                detailedInfo={event.detailed_event_info} 
-                            />
-                        </section>
-                    )}
 
                     {/* --- Media Gallery Section --- */}
                     <section className="border-t pt-6">
