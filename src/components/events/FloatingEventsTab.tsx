@@ -23,7 +23,7 @@ const FloatingEventsTab = () => {
         setLoading(true); setError(null);
         try {
             const { data, error: rpcError } = await supabase
-                .rpc('get_upcoming_events_with_rsvp', { p_user_id: user.id });
+                .rpc('get_upcoming_events_with_rsvp', { user_id_param: user.id });
             if (rpcError) throw rpcError;
             setEvents(data || []);
         } catch (err: any) {
