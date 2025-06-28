@@ -26,10 +26,10 @@ interface GroupPost {
     storage_path: string;
     public_url: string;
   }>;
-  comments?: PostComment[];
+  comments?: GroupPostComment[];
 }
 
-interface PostComment {
+interface GroupPostComment {
   id: string;
   post_id: string;
   user_id: string;
@@ -122,16 +122,16 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
           postWithMedia.media = mediaWithUrls;
         }
         
-        // Fetch comments for this post
+        // Fetch comments for this post from group_post_comments table
         const { data: commentsData, error: commentsError } = await supabase
-          .from('post_comments')
+          .from('group_post_comments')
           .select(`
             id, 
             post_id, 
             user_id, 
             content, 
             created_at,
-            user:user_id (
+            user:profiles!group_post_comments_user_id_fkey (
               id,
               full_name,
               username,
@@ -181,7 +181,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         {
           event: '*',
           schema: 'public',
-          table: 'post_comments',
+          table: 'group_post_comments',
           filter: `post_id=in.(${posts.map(p => `"${p.id}"`).join(',')})`
         },
         () => {
@@ -224,8 +224,9 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
     try {
       setSubmittingComment(true);
       
+      // Insert into group_post_comments table instead of post_comments
       const { error } = await supabase
-        .from('post_comments')
+        .from('group_post_comments')
         .insert({
           post_id: postId,
           user_id: user.id,
