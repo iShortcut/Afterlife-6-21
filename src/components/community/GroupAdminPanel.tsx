@@ -29,6 +29,7 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,22 +89,6 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
           .getPublicUrl(path);
           
         coverImageUrl = urlData.publicUrl;
-        
-        // Create media record
-        const { error: mediaError } = await supabase
-          .from('media')
-          .insert({
-            uploader_id: user.id,
-            storage_path: path,
-            entity_type: 'group_cover',
-            metadata: {
-              file_name: coverImage.name,
-              mime_type: coverImage.type,
-              size_bytes: coverImage.size
-            }
-          });
-          
-        if (mediaError) throw mediaError;
       }
       
       // Update group
@@ -135,7 +120,9 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
   const handleDeleteGroup = async () => {
     if (!user) return;
 
-    if (!confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+    // Check if the current user is the creator of the group
+    if (user.id !== group.created_by) {
+      toast.error('Only the group creator can delete this group');
       return;
     }
 
@@ -237,16 +224,18 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
             />
             
             <div className="flex justify-between mt-6 pt-4 border-t border-slate-100">
-              <Button
-                type="button"
-                variant="danger"
-                onClick={handleDeleteGroup}
-                isLoading={deleting}
-                className="flex items-center gap-2"
-              >
-                <Trash2 size={16} />
-                <span>Delete Group</span>
-              </Button>
+              {/* Only show delete button to the group creator */}
+              {user && user.id === group.created_by && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  <span>Delete Group</span>
+                </Button>
+              )}
               
               <div className="flex gap-2">
                 <Button
@@ -286,6 +275,37 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-medium text-slate-800 mb-4">Delete Group</h3>
+            
+            <p className="text-slate-600 mb-6">
+              Are you sure you want to delete this group? This action is irreversible and all group content will be permanently lost.
+            </p>
+            
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                variant="danger"
+                onClick={handleDeleteGroup}
+                isLoading={deleting}
+              >
+                Delete Group
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
