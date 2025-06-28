@@ -5,6 +5,8 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { CommunityGroup } from '../../types';
+import Button from '../../components/ui/Button';
+import TextArea from '../../components/ui/TextArea';
 import GroupHeader from '../../components/community/GroupHeader';
 import GroupPostForm from '../../components/community/GroupPostForm';
 import GroupPostList from '../../components/community/GroupPostList';
