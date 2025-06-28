@@ -10,6 +10,7 @@ import GroupPostForm from '../../components/community/GroupPostForm';
 import GroupPostList from '../../components/community/GroupPostList';
 import GroupAdminPanel from '../../components/community/GroupAdminPanel';
 import GroupMembersList from '../../components/community/GroupMembersList';
+import JoinRequestsManager from '../../components/community/JoinRequestsManager';
 import toast from 'react-hot-toast';
 
 const GroupDetail = () => {
@@ -21,7 +22,8 @@ const GroupDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [activeTab, setActiveTab] = useState<'posts' | 'members'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'members' | 'requests'>('posts');
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   const fetchGroupDetails = async () => {
     if (!user || !id) return;
@@ -61,6 +63,21 @@ const GroupDetail = () => {
         .eq('group_id', id);
 
       if (countError) throw countError;
+
+      // Get pending join requests count (for admins only)
+      let pendingRequests = 0;
+      if (membership?.role === 'admin') {
+        const { count: requestCount, error: requestError } = await supabase
+          .from('group_join_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('group_id', id)
+          .eq('status', 'pending');
+          
+        if (!requestError) {
+          pendingRequests = requestCount || 0;
+          setPendingRequestsCount(pendingRequests);
+        }
+      }
 
       // Check if user can access this group
       const isMember = !!membership;
@@ -158,6 +175,24 @@ const GroupDetail = () => {
                 >
                   Members
                 </button>
+                
+                {group.is_admin && (
+                  <button
+                    onClick={() => setActiveTab('requests')}
+                    className={`px-4 py-2 text-sm font-medium flex items-center ${
+                      activeTab === 'requests'
+                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>Join Requests</span>
+                    {pendingRequestsCount > 0 && (
+                      <span className="ml-2 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {pendingRequestsCount}
+                      </span>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
             
@@ -190,10 +225,15 @@ const GroupDetail = () => {
                   </div>
                 </div>
               </div>
-            ) : (
+            ) : activeTab === 'members' ? (
               <GroupMembersList 
                 groupId={group.id} 
                 isAdmin={group.is_admin}
+              />
+            ) : (
+              <JoinRequestsManager 
+                groupId={group.id}
+                groupName={group.name}
               />
             )}
           </>

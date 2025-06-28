@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Lock, EyeOff, Settings, UserPlus, UserMinus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Lock, EyeOff, Settings, UserPlus, UserMinus, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { CommunityGroup } from '../../types';
 import Button from '../ui/Button';
+import JoinRequestButton from './JoinRequestButton';
+import GroupInviteModal from './GroupInviteModal';
 import toast from 'react-hot-toast';
 
 interface GroupHeaderProps {
@@ -17,6 +20,7 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
   const { user } = useAuth();
   const [joining, setJoining] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const getPrivacyIcon = () => {
     switch (group.privacy) {
@@ -49,7 +53,7 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
         .insert({
           group_id: group.id,
           user_id: user.id,
-          role: 'member'
+          role: 'MEMBER'
         });
 
       if (error) throw error;
@@ -125,12 +129,23 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
           
           <div className="flex gap-2">
             {group.is_admin && (
-              <Link to={`/groups/${group.id}/settings`}>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Settings size={18} />
-                  <span>Manage Group</span>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowInviteModal(true)}
+                  className="flex items-center gap-2"
+                >
+                  <UserPlus size={18} />
+                  <span>Invite Members</span>
                 </Button>
-              </Link>
+                
+                <Link to={`/groups/${group.id}/settings`}>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Settings size={18} />
+                    <span>Manage Group</span>
+                  </Button>
+                </Link>
+              </>
             )}
             
             {group.is_member ? (
@@ -143,16 +158,20 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
                 <UserMinus size={18} />
                 <span>Leave Group</span>
               </Button>
-            ) : (
+            ) : group.privacy === 'public' ? (
               <Button 
                 onClick={handleJoinGroup}
                 isLoading={joining}
-                disabled={group.privacy !== 'public'}
                 className="flex items-center gap-2"
               >
                 <UserPlus size={18} />
                 <span>Join Group</span>
               </Button>
+            ) : (
+              <JoinRequestButton 
+                groupId={group.id}
+                groupName={group.name}
+              />
             )}
           </div>
         </div>
@@ -161,6 +180,16 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
           <p className="text-slate-600 mt-4 max-w-3xl">{group.description}</p>
         )}
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <GroupInviteModal
+          groupId={group.id}
+          groupName={group.name}
+          onClose={() => setShowInviteModal(false)}
+          onInvitationsSent={onGroupUpdated}
+        />
+      )}
     </div>
   );
 };
