@@ -66,7 +66,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         .from('posts')
         .select(`
           *,
-          author:profiles!posts_author_id_fkey (
+          author:author_id (
             id,
             full_name,
             username,
