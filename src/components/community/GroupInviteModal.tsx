@@ -73,24 +73,44 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
       if (!user || !groupId) return;
 
       try {
-        // Fetch existing members
+        // First check if user has permission to manage this group
+        const { data: userMembership, error: membershipError } = await supabase
+          .from('group_members')
+          .select('role')
+          .eq('group_id', groupId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (membershipError || !userMembership || !['ADMIN', 'MODERATOR'].includes(userMembership.role)) {
+          toast.error('You do not have permission to invite members to this group');
+          onClose();
+          return;
+        }
+
+        // Fetch existing members - only get user_id since we have permission through group membership
         const { data: membersData, error: membersError } = await supabase
           .from('group_members')
           .select('user_id')
           .eq('group_id', groupId);
 
-        if (membersError) throw membersError;
+        if (membersError) {
+          console.error('Error fetching members:', membersError);
+          throw new Error('Failed to fetch group members');
+        }
         
         setExistingMembers(membersData?.map(m => m.user_id) || []);
 
-        // Fetch existing invites - get both user_id and email separately
+        // Fetch existing invites - only get user_id and email
         const { data: invitesData, error: invitesError } = await supabase
           .from('group_invitations')
           .select('user_id, email')
           .eq('group_id', groupId)
           .eq('status', 'pending');
 
-        if (invitesError) throw invitesError;
+        if (invitesError) {
+          console.error('Error fetching invites:', invitesError);
+          throw new Error('Failed to fetch existing invitations');
+        }
         
         const invitedUserIds = invitesData?.filter(i => i.user_id).map(i => i.user_id) || [];
         const invitedEmails = invitesData?.filter(i => i.email).map(i => i.email) || [];
@@ -103,7 +123,7 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
     };
 
     fetchExistingData();
-  }, [groupId, user]);
+  }, [groupId, user, onClose]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim() || !user) return;
@@ -111,6 +131,7 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
     try {
       setIsSearching(true);
       
+      // Search profiles table directly - this should work with proper RLS policies
       const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, username, avatar_url')
@@ -118,7 +139,10 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
         .neq('id', user.id)
         .limit(10);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Search error:', error);
+        throw new Error('Failed to search users');
+      }
       
       // Mark users who are already members or invited
       const resultsWithStatus = (data || []).map(profile => ({
@@ -262,7 +286,10 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
         .from('group_invitations')
         .insert(invitations);
         
-      if (inviteError) throw inviteError;
+      if (inviteError) {
+        console.error('Error inserting invitations:', inviteError);
+        throw new Error('Failed to send invitations');
+      }
       
       // Send notifications to users
       if (userIds.length > 0) {
@@ -284,7 +311,10 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
           .from('notifications')
           .insert(notifications);
           
-        if (notifyError) console.error('Error sending notifications:', notifyError);
+        if (notifyError) {
+          console.error('Error sending notifications:', notifyError);
+          // Don't throw here, notifications are not critical
+        }
       }
       
       // Send emails (would typically be handled by an Edge Function)
