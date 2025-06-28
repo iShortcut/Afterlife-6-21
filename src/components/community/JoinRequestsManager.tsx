@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import TextArea from '../ui/TextArea';
 import toast from 'react-hot-toast';
 
 interface JoinRequestsManagerProps {
@@ -123,7 +124,7 @@ const JoinRequestsManager = ({ groupId, groupName, className = '' }: JoinRequest
         .insert({
           group_id: groupId,
           user_id: userId,
-          role: 'member',
+          role: 'MEMBER',
           status: 'JOINED'
         });
         
@@ -239,7 +240,7 @@ const JoinRequestsManager = ({ groupId, groupName, className = '' }: JoinRequest
       const membersToAdd = pendingRequests.map(req => ({
         group_id: groupId,
         user_id: req.user_id,
-        role: 'member',
+        role: 'MEMBER',
         status: 'JOINED'
       }));
       
@@ -441,11 +442,12 @@ const JoinRequestsManager = ({ groupId, groupName, className = '' }: JoinRequest
               
               {showRejectionInput === request.id && (
                 <div className="mt-4 pt-4 border-t border-slate-200">
-                  <Input
+                  <TextArea
                     placeholder="Reason for rejection (optional)"
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     className="mb-2"
+                    minRows={2}
                   />
                   <div className="flex justify-end gap-2">
                     <Button

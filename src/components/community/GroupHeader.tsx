@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, EyeOff, Settings, UserPlus, UserMinus, Users } from 'lucide-react';
+import { Lock, EyeOff, Settings, UserPlus, UserMinus, Users, Edit } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { CommunityGroup } from '../../types';
@@ -21,6 +21,8 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
   const [joining, setJoining] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [description, setDescription] = useState(group.description || '');
 
   const getPrivacyIcon = () => {
     switch (group.privacy) {
@@ -93,6 +95,26 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
       toast.error('Failed to leave group');
     } finally {
       setLeaving(false);
+    }
+  };
+
+  const handleSaveDescription = async () => {
+    if (!user || !group.is_admin) return;
+
+    try {
+      const { error } = await supabase
+        .from('community_groups')
+        .update({ description })
+        .eq('id', group.id);
+
+      if (error) throw error;
+
+      toast.success('Group description updated');
+      onGroupUpdated();
+      setIsEditingDescription(false);
+    } catch (err) {
+      console.error('Error updating group description:', err);
+      toast.error('Failed to update group description');
     }
   };
 
@@ -176,8 +198,46 @@ const GroupHeader = ({ group, onGroupUpdated, className = '' }: GroupHeaderProps
           </div>
         </div>
         
-        {group.description && (
-          <p className="text-slate-600 mt-4 max-w-3xl">{group.description}</p>
+        {isEditingDescription ? (
+          <div className="mt-4 flex flex-col gap-2">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              rows={4}
+            />
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setIsEditingDescription(false);
+                  setDescription(group.description || '');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSaveDescription}>Save</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 relative">
+            {group.description && (
+              <p className="text-slate-600 max-w-3xl">{group.description}</p>
+            )}
+            {!group.description && (
+              <p className="text-slate-400 italic">No description provided</p>
+            )}
+            {group.is_admin && (
+              <button 
+                onClick={() => setIsEditingDescription(true)}
+                className="absolute top-0 right-0 p-1 text-slate-400 hover:text-indigo-600 rounded-full hover:bg-slate-100"
+                aria-label="Edit description"
+              >
+                <Edit size={16} />
+              </button>
+            )}
+          </div>
         )}
       </div>
 

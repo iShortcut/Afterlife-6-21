@@ -81,7 +81,7 @@ const JoinRequestButton = ({ groupId, groupName, className = '' }: JoinRequestBu
         .from('group_members')
         .select('user_id')
         .eq('group_id', groupId)
-        .eq('role', 'admin');
+        .eq('role', 'ADMIN');
         
       if (adminsError) throw adminsError;
       

@@ -24,6 +24,9 @@ const GroupDetail = () => {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'members' | 'requests'>('posts');
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [groupRules, setGroupRules] = useState<string | null>(null);
+  const [isEditingRules, setIsEditingRules] = useState(false);
+  const [rulesText, setRulesText] = useState('');
 
   const fetchGroupDetails = async () => {
     if (!user || !id) return;
@@ -43,7 +46,7 @@ const GroupDetail = () => {
       // Fetch group details
       const { data: groupData, error: groupError } = await supabase
         .from('community_groups')
-        .select('*')
+        .select('*, group_rules(rules_text)')
         .eq('id', id)
         .single();
 
@@ -66,7 +69,7 @@ const GroupDetail = () => {
 
       // Get pending join requests count (for admins only)
       let pendingRequests = 0;
-      if (membership?.role === 'admin') {
+      if (membership?.role === 'ADMIN') {
         const { count: requestCount, error: requestError } = await supabase
           .from('group_join_requests')
           .select('id', { count: 'exact', head: true })
@@ -81,13 +84,19 @@ const GroupDetail = () => {
 
       // Check if user can access this group
       const isMember = !!membership;
-      const isAdmin = membership?.role === 'admin';
+      const isAdmin = membership?.role === 'ADMIN';
       const isPublic = groupData.privacy === 'public';
 
       if (!isPublic && !isMember) {
         setError('This group is private. You need to be a member to view it.');
         setLoading(false);
         return;
+      }
+
+      // Set group rules if available
+      if (groupData.group_rules && groupData.group_rules.length > 0) {
+        setGroupRules(groupData.group_rules[0].rules_text);
+        setRulesText(groupData.group_rules[0].rules_text || '');
       }
 
       setGroup({
@@ -108,6 +117,49 @@ const GroupDetail = () => {
   useEffect(() => {
     fetchGroupDetails();
   }, [id, user]);
+
+  const handleSaveRules = async () => {
+    if (!user || !group || !group.is_admin) return;
+
+    try {
+      // Check if rules already exist
+      const { data: existingRules, error: checkError } = await supabase
+        .from('group_rules')
+        .select('id')
+        .eq('group_id', id)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+
+      if (existingRules) {
+        // Update existing rules
+        const { error: updateError } = await supabase
+          .from('group_rules')
+          .update({ rules_text: rulesText })
+          .eq('id', existingRules.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new rules
+        const { error: insertError } = await supabase
+          .from('group_rules')
+          .insert({
+            group_id: id,
+            rules_text: rulesText,
+            created_by: user.id
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      setGroupRules(rulesText);
+      setIsEditingRules(false);
+      toast.success('Group rules updated');
+    } catch (err) {
+      console.error('Error saving group rules:', err);
+      toast.error('Failed to save group rules');
+    }
+  };
 
   if (loading) {
     return (
@@ -152,6 +204,60 @@ const GroupDetail = () => {
           />
         ) : (
           <>
+            {/* Group Rules Section */}
+            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-medium text-slate-800">Group Rules</h3>
+                {group.is_admin && !isEditingRules && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setIsEditingRules(true)}
+                  >
+                    Edit Rules
+                  </Button>
+                )}
+              </div>
+              
+              {isEditingRules ? (
+                <div>
+                  <TextArea
+                    value={rulesText}
+                    onChange={(e) => setRulesText(e.target.value)}
+                    placeholder="Enter group rules and guidelines..."
+                    minRows={4}
+                    className="mb-2"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setIsEditingRules(false);
+                        setRulesText(groupRules || '');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleSaveRules}
+                    >
+                      Save Rules
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {groupRules ? (
+                    <p className="text-slate-600 whitespace-pre-line">{groupRules}</p>
+                  ) : (
+                    <p className="text-slate-400 italic">No rules have been set for this group yet.</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="mb-6">
               <div className="flex border-b border-slate-200">
                 <button

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, KeyboardEvent } from 'react';
 import { motion } from 'framer-motion';
 import { X, Search, User, Upload, Check, AlertCircle, UserPlus } from 'lucide-react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import TextArea from '../ui/TextArea';
 import toast from 'react-hot-toast';
 
 interface GroupInviteModalProps {
@@ -613,9 +614,10 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         Invitation Message
                       </label>
-                      <textarea
+                      <TextArea
                         {...field}
-                        rows={4}
+                        minRows={4}
+                        maxRows={6}
                         className="w-full px-3 py-2 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-md"
                         placeholder="Enter a message to include with the invitation"
                       />
