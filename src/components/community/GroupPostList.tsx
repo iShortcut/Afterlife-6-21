@@ -3,9 +3,31 @@ import { format } from 'date-fns';
 import { User, MessageSquare, MoreVertical, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { GroupPost } from '../../types';
 import Button from '../ui/Button';
 import toast from 'react-hot-toast';
+
+interface GroupPost {
+  id: string;
+  content: string;
+  author_id: string;
+  created_at: string;
+  updated_at: string;
+  media_ids: string[] | null;
+  group_id: string;
+  status: string;
+  visibility: string;
+  author?: {
+    id: string;
+    full_name: string | null;
+    username: string | null;
+    avatar_url: string | null;
+  };
+  media?: Array<{
+    id: string;
+    storage_path: string;
+    public_url: string;
+  }>;
+}
 
 interface GroupPostListProps {
   groupId: string;
@@ -36,15 +58,15 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         .single();
 
       if (!memberError) {
-        setIsGroupModerator(['admin', 'moderator'].includes(memberData?.role || ''));
+        setIsGroupModerator(['ADMIN', 'MODERATOR'].includes(memberData?.role || ''));
       }
 
-      // Fetch posts
+      // Fetch posts from the posts table with group_id filter
       const { data, error: postsError } = await supabase
-        .from('group_posts')
+        .from('posts')
         .select(`
           *,
-          author:author_id (
+          author:profiles!posts_author_id_fkey (
             id,
             full_name,
             username,
@@ -52,6 +74,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
           )
         `)
         .eq('group_id', groupId)
+        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (postsError) throw postsError;
@@ -107,7 +130,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         {
           event: '*',
           schema: 'public',
-          table: 'group_posts',
+          table: 'posts',
           filter: `group_id=eq.${groupId}`
         },
         () => {
@@ -130,7 +153,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
     try {
       const { error } = await supabase
-        .from('group_posts')
+        .from('posts')
         .delete()
         .eq('id', postId);
 
