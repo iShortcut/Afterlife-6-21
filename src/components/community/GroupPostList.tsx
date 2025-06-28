@@ -64,7 +64,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         .from('group_posts')
         .select(`
           *,
-          author:author_id (
+          author:profiles!group_posts_author_id_fkey (
             id,
             full_name,
             username,
@@ -118,7 +118,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
   useEffect(() => {
     fetchPosts();
-    
+
     // Subscribe to changes
     const channel = supabase
       .channel(`group-${groupId}-posts`)
