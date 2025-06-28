@@ -31,6 +31,7 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
     // Update form data when group changes
@@ -39,7 +40,12 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
       description: group.description || '',
       privacy: group.privacy
     });
-  }, [group]);
+    
+    // Check if current user is the creator
+    if (user && group.created_by) {
+      setIsCreator(user.id === group.created_by);
+    }
+  }, [group, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -120,9 +126,10 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
   const handleDeleteGroup = async () => {
     if (!user) return;
 
-    // Check if the current user is the creator of the group
+    // Verify the current user is the creator
     if (user.id !== group.created_by) {
       toast.error('Only the group creator can delete this group');
+      setShowDeleteConfirm(false);
       return;
     }
 
@@ -142,6 +149,7 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
       console.error('Error deleting group:', err);
       toast.error('Failed to delete group');
       setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -225,7 +233,7 @@ const GroupAdminPanel = ({ group, onGroupUpdated, className = '' }: GroupAdminPa
             
             <div className="flex justify-between mt-6 pt-4 border-t border-slate-100">
               {/* Only show delete button to the group creator */}
-              {user && user.id === group.created_by && (
+              {isCreator && (
                 <Button
                   type="button"
                   variant="danger"
