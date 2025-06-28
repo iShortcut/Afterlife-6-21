@@ -14,8 +14,6 @@ interface GroupPost {
   updated_at: string;
   media_ids: string[] | null;
   group_id: string;
-  status: string;
-  visibility: string;
   author?: {
     id: string;
     full_name: string | null;
@@ -61,40 +59,25 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         setIsGroupModerator(['ADMIN', 'MODERATOR'].includes(memberData?.role || ''));
       }
 
-      // Fetch posts from the posts table with group_id filter
-      // Fix: Use proper join by fetching posts first, then profiles separately
-      const { data: postsData, error: postsError } = await supabase
-        .from('posts')
-        .select('*')
+      // Fetch posts from the group_posts table with group_id filter
+      const { data, error: postsError } = await supabase
+        .from('group_posts')
+        .select(`
+          *,
+          author:author_id (
+            id,
+            full_name,
+            username,
+            avatar_url
+          )
+        `)
         .eq('group_id', groupId)
-        .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (postsError) throw postsError;
 
-      if (!postsData || postsData.length === 0) {
-        setPosts([]);
-        return;
-      }
-
-      // Get unique author IDs
-      const authorIds = [...new Set(postsData.map(post => post.author_id))];
-
-      // Fetch author profiles separately
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, full_name, username, avatar_url')
-        .in('id', authorIds);
-
-      if (profilesError) throw profilesError;
-
-      // Create a map of profiles for easy lookup
-      const profilesMap = new Map(profilesData?.map(profile => [profile.id, profile]) || []);
-
       // Get media for posts
-      const postsWithMedia = await Promise.all(postsData.map(async (post) => {
-        let mediaWithUrls = [];
-        
+      const postsWithMedia = await Promise.all((data || []).map(async (post) => {
         if (post.media_ids && post.media_ids.length > 0) {
           const { data: mediaData, error: mediaError } = await supabase
             .from('media')
@@ -103,7 +86,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
           if (mediaError) throw mediaError;
 
-          mediaWithUrls = mediaData?.map(media => {
+          const mediaWithUrls = mediaData?.map(media => {
             const { data: urlData } = supabase.storage
               .from('media')
               .getPublicUrl(media.storage_path);
@@ -112,14 +95,15 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
               ...media,
               public_url: urlData.publicUrl
             };
-          }) || [];
+          });
+
+          return {
+            ...post,
+            media: mediaWithUrls
+          };
         }
 
-        return {
-          ...post,
-          author: profilesMap.get(post.author_id),
-          media: mediaWithUrls
-        };
+        return post;
       }));
 
       setPosts(postsWithMedia);
@@ -134,7 +118,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
   useEffect(() => {
     fetchPosts();
-
+    
     // Subscribe to changes
     const channel = supabase
       .channel(`group-${groupId}-posts`)
@@ -143,7 +127,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         {
           event: '*',
           schema: 'public',
-          table: 'posts',
+          table: 'group_posts',
           filter: `group_id=eq.${groupId}`
         },
         () => {
@@ -166,7 +150,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
     try {
       const { error } = await supabase
-        .from('posts')
+        .from('group_posts')
         .delete()
         .eq('id', postId);
 

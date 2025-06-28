@@ -115,9 +115,9 @@ const GroupPostForm = ({ groupId, onPostCreated, className = '' }: GroupPostForm
         }
       }
       
-      // Create post - using the correct 'posts' table with group_id
+      // Create post in the group_posts table instead of posts table
       const { error: postError } = await supabase
-        .from('posts')
+        .from('group_posts')
         .insert({
           group_id: groupId,
           author_id: user.id,
