@@ -62,26 +62,39 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
       }
 
       // Fetch posts from the posts table with group_id filter
-      // Fix: Use proper join syntax for profiles table
-      const { data, error: postsError } = await supabase
+      // Fix: Use proper join by fetching posts first, then profiles separately
+      const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select(`
-          *,
-          author:profiles!inner (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('group_id', groupId)
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 
       if (postsError) throw postsError;
 
+      if (!postsData || postsData.length === 0) {
+        setPosts([]);
+        return;
+      }
+
+      // Get unique author IDs
+      const authorIds = [...new Set(postsData.map(post => post.author_id))];
+
+      // Fetch author profiles separately
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, username, avatar_url')
+        .in('id', authorIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of profiles for easy lookup
+      const profilesMap = new Map(profilesData?.map(profile => [profile.id, profile]) || []);
+
       // Get media for posts
-      const postsWithMedia = await Promise.all((data || []).map(async (post) => {
+      const postsWithMedia = await Promise.all(postsData.map(async (post) => {
+        let mediaWithUrls = [];
+        
         if (post.media_ids && post.media_ids.length > 0) {
           const { data: mediaData, error: mediaError } = await supabase
             .from('media')
@@ -90,7 +103,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
           if (mediaError) throw mediaError;
 
-          const mediaWithUrls = mediaData?.map(media => {
+          mediaWithUrls = mediaData?.map(media => {
             const { data: urlData } = supabase.storage
               .from('media')
               .getPublicUrl(media.storage_path);
@@ -99,15 +112,14 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
               ...media,
               public_url: urlData.publicUrl
             };
-          });
-
-          return {
-            ...post,
-            media: mediaWithUrls
-          };
+          }) || [];
         }
 
-        return post;
+        return {
+          ...post,
+          author: profilesMap.get(post.author_id),
+          media: mediaWithUrls
+        };
       }));
 
       setPosts(postsWithMedia);
