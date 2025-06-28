@@ -49,6 +49,15 @@ const GroupCreateForm = () => {
       toast.error('You must be logged in to create a group');
       return;
     }
+
+    // Add defensive check for user.id
+    if (!user.id) {
+      toast.error('User ID not found. Please log in again.');
+      console.error('GroupCreateForm: user.id is null or undefined before group creation attempt.');
+      return;
+    }
+
+    console.log('Attempting to create group with user ID:', user.id);
     
     try {
       setLoading(true);
@@ -77,58 +86,61 @@ const GroupCreateForm = () => {
           
         coverImageUrl = urlData.publicUrl;
         
-        // Create media record (Assuming 'media' table exists and is needed)
-        // If 'media' table logic is not relevant or causing issues, you might remove/comment it out
-        const { error: mediaError } = await supabase
-          .from('media') // Ensure 'media' table and RLS are correctly set up if used
-          .insert({
-            uploader_id: user.id,
-            storage_path: path,
-            entity_type: 'group_cover',
-            metadata: {
-              file_name: coverImage.name,
-              mime_type: coverImage.type,
-              size_bytes: coverImage.size
-            }
-          });
-          
-        if (mediaError) throw mediaError; 
+        // Create media record only if needed - commenting out to avoid potential issues
+        // const { error: mediaError } = await supabase
+        //   .from('media')
+        //   .insert({
+        //     uploader_id: user.id,
+        //     storage_path: path,
+        //     entity_type: 'group_cover',
+        //     metadata: {
+        //       file_name: coverImage.name,
+        //       mime_type: coverImage.type,
+        //       size_bytes: coverImage.size
+        //     }
+        //   });
+        //   
+        // if (mediaError) throw mediaError; 
       }
       
-      // Create group
+      // Create group - ensure we're using the correct user ID from auth context
       const { data: group, error: groupError } = await supabase
         .from('community_groups')
         .insert({
           name: data.name.trim(),
           description: data.description?.trim() || null,
-          created_by: user.id,
+          created_by: user.id, // This must match the authenticated user's ID
           privacy: data.privacy,
           cover_image_url: coverImageUrl
         })
         .select()
         .single();
         
-      if (groupError) throw groupError;
+      if (groupError) {
+        console.error('Group creation error:', groupError);
+        throw groupError;
+      }
       
-      // Add creator as admin - THIS IS THE CORRECTED LINE
+      // Add creator as admin
       const { error: memberError } = await supabase
         .from('group_members')
         .insert({
           group_id: group.id,
           user_id: user.id,
-          role: 'ADMIN' // Changed from 'admin' to 'ADMIN'
+          role: 'ADMIN'
         });
         
-      if (memberError) throw memberError;
+      if (memberError) {
+        console.error('Member creation error:', memberError);
+        throw memberError;
+      }
       
       toast.success('Group created successfully');
-      // Ensure the navigate path is correct, e.g., /community/groups/{group.id} if needed
-      navigate(`/groups/${group.id}`); // Verify this path matches your routing setup
+      navigate(`/groups/${group.id}`);
       
     } catch (err) {
       console.error('Error creating group:', err);
-      // Provide more specific error feedback if possible
-      const typedError = err as any; // Basic type assertion
+      const typedError = err as any;
       if (typedError && typedError.message) {
          toast.error(`Failed to create group: ${typedError.message}`);
       } else {
@@ -232,7 +244,7 @@ const GroupCreateForm = () => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/groups')} // Verify this path
+          onClick={() => navigate('/groups')}
         >
           Cancel
         </Button>
