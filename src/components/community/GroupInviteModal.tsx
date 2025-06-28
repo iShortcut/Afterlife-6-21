@@ -83,7 +83,7 @@ const GroupInviteModal = ({ groupId, groupName, onClose, onInvitationsSent }: Gr
         
         setExistingMembers(membersData?.map(m => m.user_id) || []);
 
-        // Fetch existing invites
+        // Fetch existing invites - get both user_id and email separately
         const { data: invitesData, error: invitesError } = await supabase
           .from('group_invitations')
           .select('user_id, email')
