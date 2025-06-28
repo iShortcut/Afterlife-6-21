@@ -62,11 +62,13 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
       }
 
       // Fetch posts from the posts table with group_id filter
+      // Fix: Use profiles table for author information since author_id references users(id)
+      // and profiles table has the same id as users
       const { data, error: postsError } = await supabase
         .from('posts')
         .select(`
           *,
-          author:author_id (
+          profiles!posts_author_id_fkey (
             id,
             full_name,
             username,
@@ -102,11 +104,15 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
           return {
             ...post,
+            author: post.profiles,
             media: mediaWithUrls
           };
         }
 
-        return post;
+        return {
+          ...post,
+          author: post.profiles
+        };
       }));
 
       setPosts(postsWithMedia);
