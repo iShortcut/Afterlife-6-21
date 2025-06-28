@@ -59,7 +59,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
         setIsGroupModerator(['ADMIN', 'MODERATOR'].includes(memberData?.role || ''));
       }
 
-      // Fetch posts from the group_posts table with group_id filter
+      // Fetch posts from the group_posts table with author information
       const { data, error: postsError } = await supabase
         .from('group_posts')
         .select(`
@@ -118,7 +118,7 @@ const GroupPostList = ({ groupId, className = '' }: GroupPostListProps) => {
 
   useEffect(() => {
     fetchPosts();
-
+    
     // Subscribe to changes
     const channel = supabase
       .channel(`group-${groupId}-posts`)
