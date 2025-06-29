@@ -232,7 +232,8 @@ const Header = () => {
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
                     // Dynamic positioning: left-0 or right-0 based on available space
-                    className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.dashboard}`} 
+                    // Added conditional background for the entire dropdown wrapper
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -240,8 +241,8 @@ const Header = () => {
                       <Link
                         key={item.path}
                         to={item.path}
-                        // Added conditional styling for active sub-menu item
-                        className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
+                        // Removed hover:bg-slate-100 to only change text/icon color on hover
+                        className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                         role="menuitem"
                       >
                         <item.icon size={16} aria-hidden="true" />
@@ -280,7 +281,8 @@ const Header = () => {
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
                   // Dynamic positioning: left-0 or right-0 based on available space
-                  className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.offerings}`} 
+                  // Added conditional background for the entire dropdown wrapper
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -288,8 +290,8 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      // Added conditional styling for active sub-menu item
-                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
+                      // Removed hover:bg-slate-100 to only change text/icon color on hover
+                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -327,7 +329,8 @@ const Header = () => {
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
                   // Dynamic positioning: left-0 or right-0 based on available space
-                  className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.community}`} 
+                  // Added conditional background for the entire dropdown wrapper
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -335,8 +338,8 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      // Added conditional styling for active sub-menu item
-                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
+                      // Removed hover:bg-slate-100 to only change text/icon color on hover
+                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -377,7 +380,8 @@ const Header = () => {
                       transition={{ duration: 0.2 }}
                       // --- Horizontal Layout for Dropdown Content ---
                       // Dynamic positioning: left-0 or right-0 based on available space
-                      className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.profile}`} 
+                      // Added conditional background for the entire dropdown wrapper
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -386,8 +390,8 @@ const Header = () => {
                           <button
                             key={index}
                             onClick={item.onClick}
-                            // Added conditional styling for active sub-menu item
-                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} // Handle onClick items without path
+                            // Removed hover:bg-slate-100 to only change text/icon color on hover
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} // Handle onClick items without path
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -397,8 +401,8 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            // Added conditional styling for active sub-menu item
-                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
+                            // Removed hover:bg-slate-100 to only change text/icon color on hover
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -563,7 +567,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }} // Corrected exit animation for mobile dropdowns
+                        exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
@@ -581,7 +585,6 @@ const Header = () => {
                     )}
                   </AnimatePresence>
                 </div>
-              {/* Removed the extra closing parenthesis and semicolon here */}
 
               {user && (
                 <div className="border-t border-slate-100 pt-2">
@@ -605,7 +608,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
