@@ -88,15 +88,17 @@ const Header = () => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
     // Use a more appropriate fixed width for horizontal dropdowns
-    const dropdownContentFixedDesktopWidth = 350; // Adjusted fixed width for desktop dropdowns
+    // Removed fixed width estimate, now relies on content + flex-wrap
+    const dropdownContentMinRequiredWidth = 200; // Minimum width for a single item row, if content is short
 
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
       if (ref) {
         const rect = ref.getBoundingClientRect();
         // If opening from left-0 would push it off the right edge
-        // Use dropdownContentFixedDesktopWidth for calculation
-        if (rect.left + dropdownContentFixedDesktopWidth > viewportWidth - 20) { // 20px buffer from right edge
+        // Use a more dynamic check based on actual content width or a generous estimate
+        const actualDropdownContentWidth = ref.nextElementSibling?.scrollWidth || dropdownContentMinRequiredWidth; // Use actual scrollWidth if available
+        if (rect.left + actualDropdownContentWidth > viewportWidth - 20) { // 20px buffer from right edge
           newPositions[key] = 'right-0'; // Align to the right
         } else {
           newPositions[key] = 'left-0'; // Align to the left
@@ -232,7 +234,7 @@ const Header = () => {
         {/* Adjusted gap between main nav items for better proportionality on different desktop sizes */}
         {/* Changed justify-end to justify-between to spread items and prevent cutting off */}
         {/* Added flex-wrap and min-w-0 to nav to allow wrapping and prevent overflow on smaller desktop screens */}
-        <nav className="hidden md:flex items-center flex-grow justify-between gap-3 lg:gap-4 xl:gap-6 min-w-0 flex-wrap"> 
+        <nav className="hidden md:flex items-center flex-grow justify-start gap-4 lg:gap-6 xl:gap-8 min-w-0 flex-wrap"> {/* Changed justify-between to justify-start and adjusted gaps */}
           {user && (
             <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap">
               Create Memorial
@@ -269,10 +271,9 @@ const Header = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
-                    // Removed space-y-2 from here, ensuring flex-row is dominant
-                    // Dynamic positioning: left-0 or right-0 based on available space
+                    // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                     // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -322,10 +323,10 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  // Removed space-y-2 from here, ensuring flex-row is dominant
+                  // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -377,7 +378,7 @@ const Header = () => {
                   // Removed space-y-2 from here, ensuring flex-row is dominant
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -432,7 +433,7 @@ const Header = () => {
                       // Removed space-y-2 from here, ensuring flex-row is dominant
                       // Dynamic positioning: left-0 or right-0 based on available space
                       // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
