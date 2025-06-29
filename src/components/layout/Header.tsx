@@ -87,17 +87,16 @@ const Header = () => {
   const calculateDropdownPosition = useCallback(() => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
-    // Estimate dropdown width more realistically or use a fixed max-width that works
-    // Adjusted estimate for horizontal dropdowns, ensuring enough space
-    const dropdownContentWidth = 400; 
+    // Use a more appropriate fixed width for horizontal dropdowns
+    const dropdownContentFixedDesktopWidth = 350; // Adjusted fixed width for desktop dropdowns
 
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
       if (ref) {
         const rect = ref.getBoundingClientRect();
         // If opening from left-0 would push it off the right edge
-        // Added more buffer (50px) to account for potential scrollbar/edge issues
-        if (rect.left + dropdownContentWidth > viewportWidth - 50) { 
+        // Use dropdownContentFixedDesktopWidth for calculation
+        if (rect.left + dropdownContentFixedDesktopWidth > viewportWidth - 20) { // 20px buffer from right edge
           newPositions[key] = 'right-0'; // Align to the right
         } else {
           newPositions[key] = 'left-0'; // Align to the left
@@ -271,9 +270,9 @@ const Header = () => {
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
                     // Removed space-y-2 from here, ensuring flex-row is dominant
-                    // Adjusted max-w to be more flexible, using a percentage of viewport width
+                    // Dynamic positioning: left-0 or right-0 based on available space
                     // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -326,7 +325,7 @@ const Header = () => {
                   // Removed space-y-2 from here, ensuring flex-row is dominant
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -378,7 +377,7 @@ const Header = () => {
                   // Removed space-y-2 from here, ensuring flex-row is dominant
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -433,7 +432,7 @@ const Header = () => {
                       // Removed space-y-2 from here, ensuring flex-row is dominant
                       // Dynamic positioning: left-0 or right-0 based on available space
                       // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 w-80 ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} // Set a fixed width like w-80
                       role="menu"
                       aria-orientation="horizontal"
                     >
