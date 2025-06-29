@@ -577,7 +577,7 @@ const Header = () => {
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ opacity: 0, y: -10 }}
+                      exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                       className="pl-6 space-y-2 mt-2" 
                     >
