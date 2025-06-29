@@ -14,7 +14,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Refs for dropdown buttons and their content wrappers to manage hover
+  // Refs for dropdown buttons
   const dropdownRefs = {
     dashboard: useRef<HTMLButtonElement>(null),
     offerings: useRef<HTMLButtonElement>(null),
@@ -25,9 +25,9 @@ const Header = () => {
   // Ref for the entire header for click outside to close dropdowns
   const headerRef = useRef<HTMLElement>(null);
 
-  // State to store dynamic dropdown positioning (left-0 or right-0)
+  // State to store dynamic dropdown positioning
   const [dropdownPositions, setDropdownPositions] = useState<{ [key: string]: string }>({});
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null); // For hover delay
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -80,40 +80,37 @@ const Header = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    setActiveDropdown(null); // Close any open dropdowns when mobile menu toggles
+    setActiveDropdown(null);
+  };
+  
+  // *** FIXED: Added missing function for mobile dropdowns ***
+  const toggleDropdown = (dropdownName: string) => {
+    setActiveDropdown(prev => (prev === dropdownName ? null : dropdownName));
   };
 
-  // Dynamic dropdown positioning logic
   const calculateDropdownPosition = useCallback(() => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
-    // Use a more dynamic check based on actual content width
-    const defaultDropdownWidth = 250; // A base width if scrollWidth is not immediately available
-
+    
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
       if (ref && ref.nextElementSibling) {
         const dropdownContentElement = ref.nextElementSibling as HTMLElement;
-        // Calculate actual width of the dropdown content, including padding and gap
-        // This is a more robust way to get the actual rendered width of the horizontal content
-        let actualDropdownContentWidth = 0;
-        if (dropdownContentElement.scrollWidth > 0) { // Check if element has rendered and has scrollWidth
-          actualDropdownContentWidth = dropdownContentElement.scrollWidth;
-        } else { // Fallback for initial render or if scrollWidth is not reliable
-          // Sum widths of children + gaps
-          Array.from(dropdownContentElement.children).forEach(child => {
-            actualDropdownContentWidth += child.getBoundingClientRect().width;
-          });
-          actualDropdownContentWidth += (Array.from(dropdownContentElement.children).length - 1) * 16; // Add gap-x-4 (16px) for each gap
-          actualDropdownContentWidth += 32; // Add padding p-4 (16px on each side)
+        let actualDropdownContentWidth = dropdownContentElement.scrollWidth;
+
+        if (actualDropdownContentWidth === 0) { // Fallback for initial render
+            Array.from(dropdownContentElement.children).forEach(child => {
+              actualDropdownContentWidth += child.getBoundingClientRect().width;
+            });
+            actualDropdownContentWidth += (Array.from(dropdownContentElement.children).length - 1) * 16;
+            actualDropdownContentWidth += 32;
         }
         
         const rect = ref.getBoundingClientRect();
-        // If opening from left-0 would push it off the right edge
-        if (rect.left + actualDropdownContentWidth > viewportWidth - 20) { // 20px buffer from right edge
-          newPositions[key] = 'right-0'; // Align to the right
+        if (rect.left + actualDropdownContentWidth > viewportWidth - 20) {
+          newPositions[key] = 'right-0';
         } else {
-          newPositions[key] = 'left-0'; // Align to the left
+          newPositions[key] = 'left-0';
         }
       }
     }
@@ -121,13 +118,11 @@ const Header = () => {
   }, [dropdownRefs]);
 
   useEffect(() => {
-    // Recalculate positions on mount and window resize
     calculateDropdownPosition();
     window.addEventListener('resize', calculateDropdownPosition);
     return () => window.removeEventListener('resize', calculateDropdownPosition);
   }, [calculateDropdownPosition]);
 
-  // Handle dropdown hover/click behavior
   const handleMouseEnterDropdown = (dropdownName: string) => {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
@@ -139,7 +134,7 @@ const Header = () => {
   const handleMouseLeaveDropdown = () => {
     const timeout = setTimeout(() => {
       setActiveDropdown(null);
-    }, 150); // Small delay before closing
+    }, 150);
     setHoverTimeout(timeout);
   };
 
@@ -147,13 +142,12 @@ const Header = () => {
     setActiveDropdown(prevActiveDropdown => {
       const nextActiveDropdown = prevActiveDropdown === dropdownName ? null : dropdownName;
       if (nextActiveDropdown) {
-        calculateDropdownPosition(); // Recalculate position when opening by click
+        calculateDropdownPosition();
       }
       return nextActiveDropdown;
     });
   };
 
-  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
@@ -166,7 +160,6 @@ const Header = () => {
     };
   }, []);
 
-
   const dropdownMenus = {
     dashboard: [
       { label: 'Posts', path: '/dashboard?tab=posts', icon: BookHeart },
@@ -176,7 +169,7 @@ const Header = () => {
       { label: 'Events', path: '/dashboard?tab=events', icon: Calendar },
       { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle },
     ],
-    offerings: [ // This object remains 'offerings' in the state for internal logic
+    offerings: [
       { label: 'Services', path: '/services', icon: Package },
       { label: 'Products', path: '/products', icon: Package },
       { label: 'Subscription', path: '/subscription', icon: CreditCard },
@@ -198,22 +191,15 @@ const Header = () => {
     ],
   };
 
-  // Helper for arrow rotation class based on active dropdown state
-  // Achieves: UP (▲) when closed, DOWN (▼) when open
   const getArrowRotationClass = (dropdownName: string) => {
-    return activeDropdown === dropdownName ? '' : 'rotate-180'; // No rotation when open (points down), rotate 180 when closed (points up)
+    return activeDropdown === dropdownName ? '' : 'rotate-180';
   };
   
-  // Helper for active dropdown class with bold underline
   const getActiveDropdownClass = (dropdownName: string) => {
-    // Using border-b-2 for the underline. Adjust to border-b-4 or more if a thicker 'bold' effect is needed.
     return activeDropdown === dropdownName ? 'text-indigo-700 font-medium border-b-2 border-indigo-700' : '';
   };
 
-  // Helper to determine if a sub-menu item is active for highlighting
   const isSubMenuItemActive = (itemPath: string) => {
-    // Check if the current location pathname matches the item's path
-    // For paths with query parameters, compare only the base path
     const currentPath = location.pathname.split('?')[0];
     const itemBasePath = itemPath.split('?')[0];
     return currentPath === itemBasePath;
@@ -231,22 +217,22 @@ const Header = () => {
           <span className="font-medium">Afterlife</span>
         </Link>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden p-2 text-slate-700 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md"
-          onClick={toggleMenu}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
-        </button>
+        <div className="flex-grow md:hidden flex justify-end">
+            <button
+              className="p-2 text-slate-700 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md"
+              onClick={toggleMenu}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
+            </button>
+        </div>
 
-        {/* Desktop Navigation */}
-        {/* Adjusted gap between main nav items for better proportionality on different desktop sizes */}
-        {/* Changed justify-end to justify-between to spread items and prevent cutting off */}
-        {/* Added flex-wrap and min-w-0 to nav to allow wrapping and prevent overflow on smaller desktop screens */}
-        <nav className="hidden md:flex items-center flex-grow justify-start gap-4 lg:gap-6 xl:gap-8 min-w-0 flex-wrap"> {/* Changed justify-between to justify-start and adjusted gaps */}
+
+        {/* --- Desktop Navigation --- 
+              The classes below ensure wrapping behavior on smaller desktop screens */}
+        <nav className="hidden md:flex items-center flex-grow justify-start gap-4 lg:gap-6 xl:gap-8 min-w-0 flex-wrap">
           {user && (
             <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap">
               Create Memorial
@@ -282,10 +268,8 @@ const Header = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    // --- Horizontal Layout for Dropdown Content ---
-                    // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
-                    // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} // Removed max-w, min-w-max, w-80
+                    // *** FIXED: Added max-w to prevent screen overflow ***
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`}
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -334,11 +318,8 @@ const Header = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  // --- Horizontal Layout for Dropdown Content ---
-                  // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
-                  // Dynamic positioning: left-0 or right-0 based on available space
-                  // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  // *** FIXED: Added max-w to prevent screen overflow ***
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -386,10 +367,6 @@ const Header = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  // --- Horizontal Layout for Dropdown Content ---
-                  // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
-                  // Dynamic positioning: left-0 or right-0 based on available space
-                  // Added conditional background for the entire dropdown wrapper
                   className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
@@ -412,12 +389,11 @@ const Header = () => {
           
           {user && (
             <>
-              {/* NotificationBell moved to the right of Profile */}
               <div
                 className="relative flex-shrink-0"
                 onMouseEnter={() => handleMouseEnterDropdown('profile')}
                 onMouseLeave={handleMouseLeaveDropdown}
-              > {/* Wrapper div for Profile dropdown */}
+              >
                 <button
                   ref={dropdownRefs.profile}
                   onClick={() => handleClickDropdownButton('profile')}
@@ -441,11 +417,8 @@ const Header = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      // --- Horizontal Layout for Dropdown Content ---
-                      // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
-                      // Dynamic positioning: left-0 or right-0 based on available space
-                      // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
+                      // *** FIXED: Added max-w to prevent screen overflow ***
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -454,7 +427,7 @@ const Header = () => {
                           <button
                             key={index}
                             onClick={item.onClick}
-                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} // Handle onClick items without path
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap w-full text-left`}
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -463,8 +436,8 @@ const Header = () => {
                         ) : (
                           <Link
                             key={item.path}
-                            to={item.path}
-                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}
+                            to={item.path!}
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path!) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -477,7 +450,7 @@ const Header = () => {
                 </AnimatePresence>
               </div>
               
-              <NotificationBell /> {/* Bell icon moved to after Profile dropdown */}
+              <NotificationBell />
 
               <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0">
                 <Key size={18} aria-hidden="true" />
@@ -506,7 +479,7 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Mobile Navigation (remains vertical as per standard mobile UX) */}
+      {/* --- Mobile Navigation --- */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.nav
@@ -518,14 +491,12 @@ const Header = () => {
             className="md:hidden overflow-hidden bg-white border-t border-slate-100"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              {/* Removed explicit "Home" link from mobile */}
               {user && (
                 <Link to="/create-memorial" className="py-2 text-center bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                   Create Memorial
                 </Link>
               )}
 
-              {/* Mobile Dropdowns remain vertical */}
               {user && (
                 <div className="border-t border-slate-100 pt-2">
                   <button
@@ -573,16 +544,16 @@ const Header = () => {
                   onClick={() => toggleDropdown('offerings')}
                   className="w-full flex items-center justify-between py-2 text-slate-700 hover:text-indigo-700"
                   >
-                    <div className="flex items-center gap-2">
-                      <Store size={18} aria-hidden="true" />
-                      <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
-                    </div>
-                    <ChevronDown
-                      size={16}
-                      className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Store size={18} aria-hidden="true" />
+                    <span>Curated Memorials</span>
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
+                    aria-hidden="true"
+                  />
+                </button>
 
                 <AnimatePresence>
                   {activeDropdown === 'offerings' && (
@@ -679,7 +650,7 @@ const Header = () => {
                             <button
                               key={index}
                               onClick={item.onClick}
-                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 w-full text-left ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
+                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 w-full text-left`}
                             >
                               <item.icon size={16} aria-hidden="true" />
                               <span>{item.label}</span>
@@ -687,8 +658,8 @@ const Header = () => {
                           ) : (
                             <Link
                               key={item.path}
-                              to={item.path}
-                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
+                              to={item.path!}
+                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path!) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                             >
                               <item.icon size={16} aria-hidden="true" />
                               <span>{item.label}</span>
