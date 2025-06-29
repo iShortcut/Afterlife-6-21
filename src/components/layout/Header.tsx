@@ -569,7 +569,6 @@ const Header = () => {
                   </AnimatePresence>
                 </div>
               )}
-
               {user && (
                 <div className="border-t border-slate-100 pt-2">
                   <button
