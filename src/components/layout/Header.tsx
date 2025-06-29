@@ -70,6 +70,7 @@ const Header = () => {
     setActiveDropdown(null);
   };
 
+  // This function is for the mobile menu accordion
   const toggleDropdown = (dropdownName: string) => {
     setActiveDropdown(prev => (prev === dropdownName ? null : dropdownName));
   };
@@ -82,7 +83,9 @@ const Header = () => {
       if (ref?.nextElementSibling) {
         const dropdownContentElement = ref.nextElementSibling as HTMLElement;
         const rect = ref.getBoundingClientRect();
-        const dropdownWidth = dropdownContentElement.offsetWidth > 0 ? dropdownContentElement.offsetWidth : 250;
+        
+        const dropdownWidth = Math.max(dropdownContentElement.scrollWidth, 250);
+
         if (rect.left + dropdownWidth > viewportWidth - 20) {
           newPositions[key] = 'right-0';
         } else {
@@ -94,7 +97,9 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (activeDropdown) calculateDropdownPosition();
+    if(activeDropdown) {
+        calculateDropdownPosition();
+    }
     window.addEventListener('resize', calculateDropdownPosition);
     return () => window.removeEventListener('resize', calculateDropdownPosition);
   }, [activeDropdown, calculateDropdownPosition]);
@@ -110,9 +115,15 @@ const Header = () => {
   };
 
   const handleClickDropdownButton = (dropdownName: string) => {
-    setActiveDropdown(prev => (prev === dropdownName ? null : dropdownName));
+    setActiveDropdown(prev => {
+      const next = prev === dropdownName ? null : dropdownName;
+      if (next) {
+        requestAnimationFrame(calculateDropdownPosition);
+      }
+      return next;
+    });
   };
-  
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
@@ -127,13 +138,14 @@ const Header = () => {
     dashboard: [ { label: 'Posts', path: '/dashboard?tab=posts', icon: BookHeart }, { label: 'Memorials', path: '/dashboard?tab=memorials', icon: Users }, { label: 'About', path: '/dashboard?tab=about', icon: User }, { label: 'Friends', path: '/dashboard?tab=friends', icon: UserPlus }, { label: 'Events', path: '/dashboard?tab=events', icon: Calendar }, { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle }, ],
     offerings: [ { label: 'Services', path: '/services', icon: Package }, { label: 'Products', path: '/products', icon: Package }, { label: 'Subscription', path: '/subscription', icon: CreditCard }, { label: 'Memorial Store', path: '/store', icon: ShoppingBag }, ],
     community: [ { label: 'Family members', path: '/family-members', icon: Users }, { label: 'Friends', path: '/find-friends', icon: UserPlus }, { label: 'Groups', path: '/groups', icon: Users }, { label: 'Shared', path: '/shared-memorials', icon: Users }, ],
-    profile: [ { label: 'Profile Settings', path: '/profile-settings', icon: User }, { label: 'My Account', path: '/profile', icon: User }, { label: 'Messages', path: '/chat', icon: MessageCircle }, { label: 'Calendar', path: '/calendar/settings', icon: Calendar }, { label: 'My Subscription', path: '/subscription', icon: CreditCard }, { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout' }, ],
+    profile: [ { label: 'Profile Settings', path: '/profile-settings', icon: User }, { label: 'My Account', path: '/profile', icon: User }, { label: 'Messages', path: '/chat', icon: MessageCircle }, { label: 'Calendar', path: '/calendar/settings', icon: Calendar }, { label: 'My Subscription', path: '/subscription', icon: CreditCard }, { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout'}, ],
   };
-
+  
   const getArrowRotationClass = (dropdownName: string) => activeDropdown === dropdownName ? '' : 'rotate-180';
   const getActiveDropdownClass = (dropdownName: string) => activeDropdown === dropdownName ? 'text-indigo-700 font-medium border-b-2 border-indigo-700' : '';
-  const isSubMenuItemActive = (itemPath: string) => location.pathname.split('?')[0] === (itemPath ? itemPath.split('?')[0] : '');
+  const isSubMenuItemActive = (itemPath: string) => location.pathname.split('?')[0] === (itemPath?.split('?')[0] || '');
 
+  // I'm using the `renderDropdownItems` function from your provided code
   const renderDropdownItems = (menuName: keyof typeof dropdownMenus) => {
     return dropdownMenus[menuName].map((item) => (
       item.onClick ? (
@@ -171,7 +183,6 @@ const Header = () => {
             </Link>
           )}
 
-          {/* Reverted to original structure and applied CSS Grid fix to dropdowns */}
           <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('dashboard')} onMouseLeave={handleMouseLeaveDropdown}>
             <button ref={dropdownRefs.dashboard} onClick={() => handleClickDropdownButton('dashboard')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 ...`}>
               <Settings size={18} /><span>Dashboard</span><ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('dashboard')}`} />
@@ -226,7 +237,14 @@ const Header = () => {
                 </AnimatePresence>
               </div>
               <NotificationBell />
-              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 p-2 rounded-md"><Key size={18} /></Link>
+              
+              {/* === THIS IS THE ADDED CODE === */}
+              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 p-2 rounded-md flex items-center gap-2">
+                <Key size={18} />
+                <span className="hidden lg:inline">API</span>
+              </Link>
+              {/* === END OF ADDED CODE === */}
+              
               {isAdmin && <Link to="/admin" className="text-slate-700 hover:text-indigo-700 p-2 rounded-md"><Shield size={18} /></Link>}
             </>
           )}
@@ -240,12 +258,32 @@ const Header = () => {
         </nav>
       </div>
 
-       {/* Mobile Navigation (remains vertical) */}
+       {/* Mobile Navigation */}
        <AnimatePresence>
         {isMenuOpen && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ opacity: 0 }} className="md:hidden overflow-hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {/* Mobile menu content goes here, simplified for clarity */}
+              {/* ... Other mobile links ... */}
+
+              {user && (
+                <>
+                  {/* === THIS IS THE ADDED CODE FOR MOBILE === */}
+                  <Link to="/developer/api" className="py-2 text-slate-700 hover:text-indigo-700 rounded-md flex items-center gap-2">
+                    <Key size={18} aria-hidden="true" />
+                    <span>API</span>
+                  </Link>
+                  {/* === END OF ADDED CODE FOR MOBILE === */}
+                  
+                  {isAdmin && (
+                    <Link to="/admin" className="py-2 text-slate-700 hover:text-indigo-700 rounded-md flex items-center gap-2">
+                      <Shield size={18} aria-hidden="true" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {/* ... Other mobile links ... */}
             </div>
           </motion.div>
         )}
