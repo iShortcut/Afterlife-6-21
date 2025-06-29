@@ -68,7 +68,6 @@ const Header = () => {
     setActiveDropdown(null);
   };
 
-  // Adjusted dropdown toggle logic for the specified arrow behavior
   const toggleDropdown = (dropdown: string) => {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
   };
@@ -104,22 +103,22 @@ const Header = () => {
     ],
   };
 
-  // Helper for arrow rotation class based on active dropdown
+  // Helper for arrow rotation class based on active dropdown state
+  // Achieves: UP (▲) when closed, DOWN (▼) when open
   const getArrowRotationClass = (dropdownName: string) => {
-    // Arrow UP (^) when closed (default), DOWN (v) when open
-    return activeDropdown === dropdownName ? 'rotate-180' : '';
+    return activeDropdown === dropdownName ? '' : 'rotate-180'; // No rotation when open (points down), rotate 180 when closed (points up)
   };
   
-  // Helper for active dropdown class with underline
+  // Helper for active dropdown class with bold underline
   const getActiveDropdownClass = (dropdownName: string) => {
+    // Using border-b-2 for the underline. Adjust to border-b-4 or more if a thicker 'bold' effect is needed.
     return activeDropdown === dropdownName ? 'text-indigo-700 font-medium border-b-2 border-indigo-700' : '';
-    // You might need to adjust border-b-2 to border-b-4 or more if the 'bold' effect isn't enough,
-    // or use custom CSS for the exact Shopify-like underline.
   };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      {/* Main header container: Adjusted to justify-start and added gap-x-12 for overall left shift */}
+      <div className="container mx-auto px-4 py-4 flex items-center justify-start gap-x-12"> 
         {/* Afterlife Logo/Link (serves as Home) */}
         <Link
           to="/"
@@ -142,7 +141,8 @@ const Header = () => {
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8"> {/* Adjusted gap for better spacing */}
+        {/* Adjusted gap between main nav items for better proportionality */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8"> 
           {user && (
             <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
               Create Memorial
@@ -157,7 +157,7 @@ const Header = () => {
                 aria-expanded={activeDropdown === 'dashboard'}
                 aria-haspopup="true"
               >
-                <Settings size={18} aria-hidden="true" /> {/* Dashboard icon - assuming this is the correct existing one */}
+                <Settings size={18} aria-hidden="true" /> {/* Dashboard icon (existing) */}
                 <span>Dashboard</span>
                 <ChevronDown
                   size={16}
@@ -165,7 +165,7 @@ const Header = () => {
                   aria-hidden="true"
                 />
               </button>
-
+              
               <AnimatePresence>
                 {activeDropdown === 'dashboard' && (
                   <motion.div
@@ -173,16 +173,17 @@ const Header = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    // --- Horizontal Layout Changes ---
-                    className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" // Added flex-row, flex-wrap, gap, min-w-max
+                    // --- Horizontal Layout for Dropdown Content ---
+                    className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
                     role="menu"
-                    aria-orientation="horizontal" // Changed to horizontal
+                    aria-orientation="horizontal"
                   >
                     {dropdownMenus.dashboard.map((item) => (
                       <Link
                         key={item.path}
                         to={item.path}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" // Added whitespace-nowrap
+                        // Adjusted padding and added whitespace-nowrap for horizontal items
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" 
                         role="menuitem"
                       >
                         <item.icon size={16} aria-hidden="true" />
@@ -194,7 +195,7 @@ const Header = () => {
               </AnimatePresence>
             </div>
           )}
-
+          
           <div className="relative">
             <button
               onClick={() => toggleDropdown('offerings')}
@@ -202,7 +203,7 @@ const Header = () => {
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
-              <Store size={18} aria-hidden="true" /> {/* Icon for Our Offerings */}
+              <Store size={18} aria-hidden="true" /> {/* Icon for Our Offerings (existing) */}
               <span>Our Offerings</span>
               <ChevronDown
                 size={16}
@@ -210,7 +211,7 @@ const Header = () => {
                 aria-hidden="true"
               />
             </button>
-
+            
             <AnimatePresence>
               {activeDropdown === 'offerings' && (
                 <motion.div
@@ -218,8 +219,8 @@ const Header = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  // --- Horizontal Layout Changes ---
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" // Added flex-row, flex-wrap, gap, min-w-max
+                  // --- Horizontal Layout for Dropdown Content ---
+                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -227,7 +228,7 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" // Added whitespace-nowrap
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -238,7 +239,7 @@ const Header = () => {
               )}
             </AnimatePresence>
           </div>
-
+          
           <div className="relative">
             <button
               onClick={() => toggleDropdown('community')}
@@ -246,7 +247,7 @@ const Header = () => {
               aria-expanded={activeDropdown === 'community'}
               aria-haspopup="true"
             >
-              <Globe size={18} aria-hidden="true" /> {/* Icon for Community */}
+              <Globe size={18} aria-hidden="true" /> {/* Icon for Community (existing) */}
               <span>Community</span>
               <ChevronDown
                 size={16}
@@ -254,7 +255,7 @@ const Header = () => {
                 aria-hidden="true"
               />
             </button>
-
+            
             <AnimatePresence>
               {activeDropdown === 'community' && (
                 <motion.div
@@ -262,8 +263,8 @@ const Header = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  // --- Horizontal Layout Changes ---
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" // Added flex-row, flex-wrap, gap, min-w-max
+                  // --- Horizontal Layout for Dropdown Content ---
+                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -271,7 +272,7 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" // Added whitespace-nowrap
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -282,11 +283,11 @@ const Header = () => {
               )}
             </AnimatePresence>
           </div>
-
+          
           {user && (
             <>
               <NotificationBell /> {/* Bell icon, remains as is */}
-
+              
               <div className="relative">
                 <button
                   onClick={() => toggleDropdown('profile')}
@@ -302,7 +303,7 @@ const Header = () => {
                     aria-hidden="true"
                   />
                 </button>
-
+                
                 <AnimatePresence>
                   {activeDropdown === 'profile' && (
                     <motion.div
@@ -310,8 +311,9 @@ const Header = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      // --- Horizontal Layout Changes ---
-                      className="absolute right-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" // Adjusted right-0 for dropdown placement
+                      // --- Horizontal Layout for Dropdown Content ---
+                      // Adjusted right-0 to align dropdown to the right of the Profile button
+                      className="absolute right-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -320,7 +322,7 @@ const Header = () => {
                           <button
                             key={index}
                             onClick={item.onClick}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" // Adjusted padding/gap, whitespace
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -330,7 +332,7 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" // Adjusted padding/gap, whitespace
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -342,12 +344,12 @@ const Header = () => {
                   )}
                 </AnimatePresence>
               </div>
-
+              
               <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2">
                 <Key size={18} aria-hidden="true" />
                 <span>API</span>
               </Link>
-
+              
               {isAdmin && (
                 <Link to="/admin" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2">
                   <Shield size={18} aria-hidden="true" />
@@ -356,7 +358,7 @@ const Header = () => {
               )}
             </>
           )}
-
+          
           {!user && (
             <>
               <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1">
@@ -370,7 +372,7 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation (remains vertical as per standard mobile UX) */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.nav
@@ -389,7 +391,7 @@ const Header = () => {
                 </Link>
               )}
 
-              {/* Mobile Dropdowns (These remain vertical as per standard mobile UX) */}
+              {/* Mobile Dropdowns remain vertical */}
               {user && (
                 <div className="border-t border-slate-100 pt-2">
                   <button
@@ -414,7 +416,7 @@ const Header = () => {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="pl-6 space-y-2 mt-2" // Mobile dropdowns remain vertical
+                        className="pl-6 space-y-2 mt-2" 
                       >
                         {dropdownMenus.dashboard.map((item) => (
                           <Link
@@ -455,7 +457,7 @@ const Header = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="pl-6 space-y-2 mt-2" // Mobile dropdowns remain vertical
+                      className="pl-6 space-y-2 mt-2" 
                     >
                       {dropdownMenus.offerings.map((item) => (
                         <Link
@@ -495,7 +497,7 @@ const Header = () => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="pl-6 space-y-2 mt-2" // Mobile dropdowns remain vertical
+                      className="pl-6 space-y-2 mt-2" 
                     >
                       {dropdownMenus.community.map((item) => (
                         <Link
@@ -536,7 +538,7 @@ const Header = () => {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="pl-6 space-y-2 mt-2" // Mobile dropdowns remain vertical
+                        className="pl-6 space-y-2 mt-2" 
                       >
                         {dropdownMenus.profile.map((item, index) => (
                           item.onClick ? (
@@ -571,7 +573,7 @@ const Header = () => {
                     <Key size={18} aria-hidden="true" />
                     <span>API</span>
                   </Link>
-
+                  
                   {isAdmin && (
                     <Link to="/admin" className="py-2 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md flex items-center gap-2">
                       <Shield size={18} aria-hidden="true" />
@@ -583,7 +585,7 @@ const Header = () => {
 
               {!user && (
                 <>
-                  <Link to="/login" className="py-2 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-ring-indigo-500 focus:ring-offset-2 rounded-md">
+                  <Link to="/login" className="py-2 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md">
                     Sign In
                   </Link>
                   <Link to="/register" className="py-2 text-center bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
