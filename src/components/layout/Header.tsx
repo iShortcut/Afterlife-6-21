@@ -88,14 +88,16 @@ const Header = () => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
     // Estimate dropdown width more realistically or use a fixed max-width that works
-    const dropdownContentWidth = 250; // A reasonable estimate for content width
+    // Increased estimate as horizontal dropdowns can be wider
+    const dropdownContentWidth = 400; // Adjusted estimate for horizontal dropdowns
 
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
       if (ref) {
         const rect = ref.getBoundingClientRect();
         // If opening from left-0 would push it off the right edge
-        if (rect.left + dropdownContentWidth > viewportWidth - 20) { // 20px buffer from right edge
+        // Added more buffer (50px) to account for potential scrollbar/edge issues
+        if (rect.left + dropdownContentWidth > viewportWidth - 50) { 
           newPositions[key] = 'right-0'; // Align to the right
         } else {
           newPositions[key] = 'left-0'; // Align to the left
@@ -232,23 +234,24 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         {/* Adjusted gap between main nav items for better proportionality on different desktop sizes */}
-        <nav className="hidden md:flex items-center flex-grow justify-end gap-3 lg:gap-4 xl:gap-6 min-w-0"> {/* Added flex-grow, justify-end, and more granular gaps, min-w-0 */}
+        {/* Added flex-wrap and min-w-0 to nav to allow wrapping and prevent overflow on smaller desktop screens */}
+        <nav className="hidden md:flex items-center flex-grow justify-end gap-3 lg:gap-4 xl:gap-6 min-w-0 flex-wrap"> 
           {user && (
-            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0"> {/* Added flex-shrink-0 */}
+            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap"> {/* Added flex-shrink-0 and whitespace-nowrap */}
               Create Memorial
             </Link>
           )}
 
           {user && (
             <div
-              className="relative"
+              className="relative flex-shrink-0" // Added flex-shrink-0
               onMouseEnter={() => handleMouseEnterDropdown('dashboard')}
               onMouseLeave={handleMouseLeaveDropdown}
             >
               <button
                 ref={dropdownRefs.dashboard} // Assign ref
                 onClick={() => handleClickDropdownButton('dashboard')} // Use click handler
-                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('dashboard')}`} // Removed extra comment causing syntax error
+                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('dashboard')}`} 
                 aria-expanded={activeDropdown === 'dashboard'}
                 aria-haspopup="true"
               >
@@ -271,6 +274,7 @@ const Header = () => {
                     // --- Horizontal Layout for Dropdown Content ---
                     // Dynamic positioning: left-0 or right-0 based on available space
                     // Added conditional background for the entire dropdown wrapper
+                    // Adjusted max-w to be more flexible, using a percentage of viewport width
                     className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
@@ -294,14 +298,14 @@ const Header = () => {
           )}
           
           <div
-            className="relative"
+            className="relative flex-shrink-0" // Added flex-shrink-0
             onMouseEnter={() => handleMouseEnterDropdown('offerings')}
             onMouseLeave={handleMouseLeaveDropdown}
           >
             <button
               ref={dropdownRefs.offerings} // Assign ref
               onClick={() => handleClickDropdownButton('offerings')} // Use click handler
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('offerings')}`} // Removed extra comment causing syntax error
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('offerings')}`} 
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
@@ -346,14 +350,14 @@ const Header = () => {
           </div>
           
           <div
-            className="relative"
+            className="relative flex-shrink-0" // Added flex-shrink-0
             onMouseEnter={() => handleMouseEnterDropdown('community')}
             onMouseLeave={handleMouseLeaveDropdown}
           >
             <button
               ref={dropdownRefs.community} // Assign ref
               onClick={() => handleClickDropdownButton('community')} // Use click handler
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('community')}`} // Removed extra comment causing syntax error
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('community')}`} 
               aria-expanded={activeDropdown === 'community'}
               aria-haspopup="true"
             >
@@ -401,14 +405,14 @@ const Header = () => {
             <>
               {/* NotificationBell moved to the right of Profile */}
               <div
-                className="relative"
+                className="relative flex-shrink-0" // Added flex-shrink-0
                 onMouseEnter={() => handleMouseEnterDropdown('profile')}
                 onMouseLeave={handleMouseLeaveDropdown}
               > {/* Wrapper div for Profile dropdown */}
                 <button
                   ref={dropdownRefs.profile} // Assign ref
                   onClick={() => handleClickDropdownButton('profile')} // Use click handler
-                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('profile')}`} // Removed extra comment causing syntax error
+                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('profile')}`} 
                   aria-expanded={activeDropdown === 'profile'}
                   aria-haspopup="true"
                 >
@@ -617,7 +621,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
