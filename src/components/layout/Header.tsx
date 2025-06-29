@@ -81,7 +81,7 @@ const Header = () => {
       { label: 'Events', path: '/dashboard?tab=events', icon: Calendar },
       { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle },
     ],
-    offerings: [
+    offerings: [ // This object remains 'offerings' in the state for internal logic
       { label: 'Services', path: '/services', icon: Package },
       { label: 'Products', path: '/products', icon: Package },
       { label: 'Subscription', path: '/subscription', icon: CreditCard },
@@ -175,7 +175,8 @@ const Header = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
-                    className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
+                    // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
+                    className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -204,8 +205,8 @@ const Header = () => {
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
-              <Store size={18} aria-hidden="true" /> {/* Icon for Our Offerings (existing) */}
-              <span>Our Offerings</span>
+              <Store size={18} aria-hidden="true" /> {/* Icon for Curated Memorials (existing Store icon used) */}
+              <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
               <ChevronDown
                 size={16}
                 className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
@@ -221,7 +222,8 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
+                  // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
+                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -265,7 +267,8 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
+                  // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
+                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -287,9 +290,8 @@ const Header = () => {
           
           {user && (
             <>
-              <NotificationBell /> {/* Bell icon, remains as is */}
-              
-              <div className="relative">
+              {/* NotificationBell moved to the right of Profile */}
+              <div className="relative"> {/* Wrapper div for Profile dropdown */}
                 <button
                   onClick={() => toggleDropdown('profile')}
                   className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${getActiveDropdownClass('profile')}`}
@@ -314,7 +316,8 @@ const Header = () => {
                       transition={{ duration: 0.2 }}
                       // --- Horizontal Layout for Dropdown Content ---
                       // Changed from right-0 to left-0 to shift it away from the Events widget
-                      className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
+                      // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
+                      className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -346,6 +349,8 @@ const Header = () => {
                 </AnimatePresence>
               </div>
               
+              <NotificationBell /> {/* Bell icon moved to after Profile dropdown */}
+
               <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2">
                 <Key size={18} aria-hidden="true" />
                 <span>API</span>
@@ -442,7 +447,7 @@ const Header = () => {
                 >
                   <div className="flex items-center gap-2">
                     <Store size={18} aria-hidden="true" />
-                    <span>Our Offerings</span>
+                    <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
                   </div>
                   <ChevronDown
                     size={16}
