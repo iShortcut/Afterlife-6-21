@@ -70,7 +70,6 @@ const Header = () => {
     setActiveDropdown(null);
   };
 
-  // This function is for the mobile menu accordion
   const toggleDropdown = (dropdownName: string) => {
     setActiveDropdown(prev => (prev === dropdownName ? null : dropdownName));
   };
@@ -83,10 +82,7 @@ const Header = () => {
       if (ref?.nextElementSibling) {
         const dropdownContentElement = ref.nextElementSibling as HTMLElement;
         const rect = ref.getBoundingClientRect();
-        
-        // Use a simple width calculation for robustness
-        const dropdownWidth = Math.max(dropdownContentElement.scrollWidth, 250);
-
+        const dropdownWidth = dropdownContentElement.offsetWidth > 0 ? dropdownContentElement.offsetWidth : 250;
         if (rect.left + dropdownWidth > viewportWidth - 20) {
           newPositions[key] = 'right-0';
         } else {
@@ -98,9 +94,7 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    if(activeDropdown) {
-        calculateDropdownPosition();
-    }
+    if (activeDropdown) calculateDropdownPosition();
     window.addEventListener('resize', calculateDropdownPosition);
     return () => window.removeEventListener('resize', calculateDropdownPosition);
   }, [activeDropdown, calculateDropdownPosition]);
@@ -116,16 +110,9 @@ const Header = () => {
   };
 
   const handleClickDropdownButton = (dropdownName: string) => {
-    setActiveDropdown(prev => {
-      const next = prev === dropdownName ? null : dropdownName;
-      if (next) {
-        // Ensure position is calculated on click as well
-        requestAnimationFrame(calculateDropdownPosition);
-      }
-      return next;
-    });
+    setActiveDropdown(prev => (prev === dropdownName ? null : dropdownName));
   };
-
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
@@ -140,85 +127,127 @@ const Header = () => {
     dashboard: [ { label: 'Posts', path: '/dashboard?tab=posts', icon: BookHeart }, { label: 'Memorials', path: '/dashboard?tab=memorials', icon: Users }, { label: 'About', path: '/dashboard?tab=about', icon: User }, { label: 'Friends', path: '/dashboard?tab=friends', icon: UserPlus }, { label: 'Events', path: '/dashboard?tab=events', icon: Calendar }, { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle }, ],
     offerings: [ { label: 'Services', path: '/services', icon: Package }, { label: 'Products', path: '/products', icon: Package }, { label: 'Subscription', path: '/subscription', icon: CreditCard }, { label: 'Memorial Store', path: '/store', icon: ShoppingBag }, ],
     community: [ { label: 'Family members', path: '/family-members', icon: Users }, { label: 'Friends', path: '/find-friends', icon: UserPlus }, { label: 'Groups', path: '/groups', icon: Users }, { label: 'Shared', path: '/shared-memorials', icon: Users }, ],
-    profile: [ { label: 'Profile Settings', path: '/profile-settings', icon: User }, { label: 'My Account', path: '/profile', icon: User }, { label: 'Messages', path: '/chat', icon: MessageCircle }, { label: 'Calendar', path: '/calendar/settings', icon: Calendar }, { label: 'My Subscription', path: '/subscription', icon: CreditCard }, { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout'}, ],
+    profile: [ { label: 'Profile Settings', path: '/profile-settings', icon: User }, { label: 'My Account', path: '/profile', icon: User }, { label: 'Messages', path: '/chat', icon: MessageCircle }, { label: 'Calendar', path: '/calendar/settings', icon: Calendar }, { label: 'My Subscription', path: '/subscription', icon: CreditCard }, { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout' }, ],
   };
-  
+
   const getArrowRotationClass = (dropdownName: string) => activeDropdown === dropdownName ? '' : 'rotate-180';
   const getActiveDropdownClass = (dropdownName: string) => activeDropdown === dropdownName ? 'text-indigo-700 font-medium border-b-2 border-indigo-700' : '';
-  const isSubMenuItemActive = (itemPath: string) => location.pathname.split('?')[0] === (itemPath?.split('?')[0] || '');
+  const isSubMenuItemActive = (itemPath: string) => location.pathname.split('?')[0] === (itemPath ? itemPath.split('?')[0] : '');
 
-  const renderDropdown = (name: keyof typeof dropdownMenus, buttonContent: React.ReactNode) => (
-    <div className="relative" onMouseEnter={() => handleMouseEnterDropdown(name)} onMouseLeave={handleMouseLeaveDropdown}>
-      <button ref={dropdownRefs[name]} onClick={() => handleClickDropdownButton(name)} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap text-sm md:text-base ${getActiveDropdownClass(name)}`} aria-expanded={activeDropdown === name} aria-haspopup="true">
-        {buttonContent}
-        <ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass(name)}`} />
-      </button>
-      <AnimatePresence>
-        {activeDropdown === name && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 ${dropdownPositions[name]} ${activeDropdown === name ? 'bg-indigo-50' : 'bg-white'}`} role="menu" aria-orientation="horizontal">
-            {dropdownMenus[name].map((item) => (
-              item.onClick ? (
-                <button key={item.label} onClick={item.onClick} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap">
-                  <item.icon size={16} /><span>{item.label}</span>
-                </button>
-              ) : (
-                <Link key={item.path} to={item.path!} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path!) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}>
-                  <item.icon size={16} /><span>{item.label}</span>
-                </Link>
-              )
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-
+  const renderDropdownItems = (menuName: keyof typeof dropdownMenus) => {
+    return dropdownMenus[menuName].map((item) => (
+      item.onClick ? (
+        <button key={item.label} onClick={item.onClick} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap text-left w-full">
+          <item.icon size={16} aria-hidden="true" />
+          <span>{item.label}</span>
+        </button>
+      ) : (
+        <Link key={item.path} to={item.path!} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path!) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}>
+          <item.icon size={16} aria-hidden="true" />
+          <span>{item.label}</span>
+        </Link>
+      )
+    ));
+  };
+  
   return (
     <header ref={headerRef} className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-start md:gap-x-4 lg:gap-x-12">
         <Link to="/" className="flex items-center gap-2 font-serif tracking-wide text-indigo-900 flex-shrink-0 text-lg md:text-xl" aria-label="Afterlife">
-          <BookHeart size={28} className="text-indigo-700" />
+          <BookHeart size={28} className="text-indigo-700" aria-hidden="true" />
           <span className="font-medium">Afterlife</span>
         </Link>
+
         <div className="flex-grow flex justify-end md:hidden">
-          <button onClick={toggleMenu} className="p-2 text-slate-700" aria-label="Toggle menu">
+          <button onClick={toggleMenu} className="p-2 text-slate-700 hover:text-indigo-700" aria-label="Toggle Menu">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
+
         <nav className="hidden md:flex items-center flex-grow justify-start gap-4 lg:gap-6 xl:gap-8 min-w-0 flex-wrap">
           {user && (
             <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap text-sm md:text-base">
               Create Memorial
             </Link>
           )}
-          {user && renderDropdown('dashboard', <><Settings size={18} /><span>Dashboard</span></>)}
-          {renderDropdown('offerings', <><Store size={18} /><span>Curated Memorials</span></>)}
-          {renderDropdown('community', <><Globe size={18} /><span>Community</span></>)}
-          <div className="flex-grow" /> {/* Spacer */}
-          {user ? (
-            <div className="flex items-center gap-2">
-              {renderDropdown('profile', <><User size={18} /><span>Profile</span></>)}
+
+          {/* Reverted to original structure and applied CSS Grid fix to dropdowns */}
+          <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('dashboard')} onMouseLeave={handleMouseLeaveDropdown}>
+            <button ref={dropdownRefs.dashboard} onClick={() => handleClickDropdownButton('dashboard')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 ...`}>
+              <Settings size={18} /><span>Dashboard</span><ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('dashboard')}`} />
+            </button>
+            <AnimatePresence>
+              {activeDropdown === 'dashboard' && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 gap-2 ${dropdownPositions.dashboard} bg-white grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] w-max max-w-screen-md`}>
+                  {renderDropdownItems('dashboard')}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('offerings')} onMouseLeave={handleMouseLeaveDropdown}>
+            <button ref={dropdownRefs.offerings} onClick={() => handleClickDropdownButton('offerings')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 ...`}>
+              <Store size={18} /><span>Curated Memorials</span><ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`} />
+            </button>
+            <AnimatePresence>
+              {activeDropdown === 'offerings' && (
+                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 gap-2 ${dropdownPositions.offerings} bg-white grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] w-max max-w-screen-md`}>
+                  {renderDropdownItems('offerings')}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('community')} onMouseLeave={handleMouseLeaveDropdown}>
+             <button ref={dropdownRefs.community} onClick={() => handleClickDropdownButton('community')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 ...`}>
+               <Globe size={18} /><span>Community</span><ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('community')}`} />
+             </button>
+             <AnimatePresence>
+              {activeDropdown === 'community' && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 gap-2 ${dropdownPositions.community} bg-white grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] w-max max-w-screen-md`}>
+                    {renderDropdownItems('community')}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {user && (
+            <>
+              <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('profile')} onMouseLeave={handleMouseLeaveDropdown}>
+                <button ref={dropdownRefs.profile} onClick={() => handleClickDropdownButton('profile')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 ...`}>
+                  <User size={18} /><span>Profile</span><ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('profile')}`} />
+                </button>
+                <AnimatePresence>
+                  {activeDropdown === 'profile' && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 gap-2 ${dropdownPositions.profile} bg-white grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] w-max max-w-screen-md`}>
+                      {renderDropdownItems('profile')}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <NotificationBell />
               <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 p-2 rounded-md"><Key size={18} /></Link>
               {isAdmin && <Link to="/admin" className="text-slate-700 hover:text-indigo-700 p-2 rounded-md"><Shield size={18} /></Link>}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="text-slate-700 hover:text-indigo-700 px-3 py-2 rounded-md text-sm md:text-base">Sign In</Link>
-              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 text-sm md:text-base">Create Account</Link>
-            </div>
+            </>
+          )}
+
+          {!user && (
+            <>
+              <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors px-3 py-2 rounded-md text-sm md:text-base">Sign In</Link>
+              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm md:text-base">Create Account</Link>
+            </>
           )}
         </nav>
       </div>
-      
-      {/* Mobile Navigation */}
-      <AnimatePresence>
+
+       {/* Mobile Navigation (remains vertical) */}
+       <AnimatePresence>
         {isMenuOpen && (
-          <motion.nav id="mobile-menu" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ opacity: 0 }} className="md:hidden">
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ opacity: 0 }} className="md:hidden overflow-hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {/* Simplified for brevity, vertical layout is standard here */}
+              {/* Mobile menu content goes here, simplified for clarity */}
             </div>
-          </motion.nav>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>
