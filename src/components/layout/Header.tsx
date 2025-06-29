@@ -117,8 +117,9 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      {/* Main header container: Adjusted to justify-start and added gap-x-12 for overall left shift */}
-      <div className="container mx-auto px-4 py-4 flex items-center justify-start gap-x-12"> 
+      {/* Main header container: Adjusted to justify-start and added responsive gap for overall left shift */}
+      {/* gap-x-4 for medium screens, gap-x-12 for large screens to control spacing from Afterlife logo */}
+      <div className="container mx-auto px-4 py-4 flex items-center justify-start md:gap-x-4 lg:gap-x-12"> 
         {/* Afterlife Logo/Link (serves as Home) */}
         <Link
           to="/"
@@ -141,8 +142,8 @@ const Header = () => {
         </button>
 
         {/* Desktop Navigation */}
-        {/* Adjusted gap between main nav items for better proportionality */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8"> 
+        {/* Adjusted gap between main nav items for better proportionality on different desktop sizes */}
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6"> 
           {user && (
             <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
               Create Memorial
