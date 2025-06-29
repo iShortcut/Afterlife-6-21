@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, BookHeart, User, Package, MessageCircle, Shield, Users, CreditCard, ShoppingBag, UserPlus, Key, Calendar, Settings, Bell, ChevronDown } from 'lucide-react';
+import { Menu, X, BookHeart, User, Package, MessageCircle, Shield, Users, CreditCard, ShoppingBag, UserPlus, Key, Calendar, Settings, ChevronDown, Store, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
@@ -109,7 +109,7 @@ const Header = () => {
         <Link
           to="/"
           className="flex items-center gap-2 text-xl font-serif tracking-wide text-indigo-900"
-          aria-label="Afterlife Home"
+          aria-label="Afterlife"
         >
           <BookHeart size={28} className="text-indigo-700" aria-hidden="true" />
           <span className="font-medium">Afterlife</span>
@@ -142,7 +142,7 @@ const Header = () => {
             <div className="relative">
               <button
                 onClick={() => toggleDropdown('dashboard')}
-                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'dashboard' ? 'text-indigo-700 border-b-2 border-indigo-700' : ''}`}
+                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'dashboard' ? 'text-indigo-700 border-b-2 border-indigo-700 font-medium' : ''}`}
                 aria-expanded={activeDropdown === 'dashboard'}
                 aria-haspopup="true"
               >
@@ -186,10 +186,11 @@ const Header = () => {
           <div className="relative">
             <button
               onClick={() => toggleDropdown('offerings')}
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'offerings' ? 'text-indigo-700 border-b-2 border-indigo-700' : ''}`}
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'offerings' ? 'text-indigo-700 border-b-2 border-indigo-700 font-medium' : ''}`}
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
+              <Store size={18} aria-hidden="true" />
               <span>Our Offerings</span>
               <ChevronDown 
                 size={16} 
@@ -228,10 +229,11 @@ const Header = () => {
           <div className="relative">
             <button
               onClick={() => toggleDropdown('community')}
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'community' ? 'text-indigo-700 border-b-2 border-indigo-700' : ''}`}
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'community' ? 'text-indigo-700 border-b-2 border-indigo-700 font-medium' : ''}`}
               aria-expanded={activeDropdown === 'community'}
               aria-haspopup="true"
             >
+              <Globe size={18} aria-hidden="true" />
               <span>Community</span>
               <ChevronDown 
                 size={16} 
@@ -274,7 +276,7 @@ const Header = () => {
               <div className="relative">
                 <button
                   onClick={() => toggleDropdown('profile')}
-                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'profile' ? 'text-indigo-700 border-b-2 border-indigo-700' : ''}`}
+                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${activeDropdown === 'profile' ? 'text-indigo-700 border-b-2 border-indigo-700 font-medium' : ''}`}
                   aria-expanded={activeDropdown === 'profile'}
                   aria-haspopup="true"
                 >
@@ -423,7 +425,10 @@ const Header = () => {
                   onClick={() => toggleDropdown('offerings')}
                   className="w-full flex items-center justify-between py-2 text-slate-700 hover:text-indigo-700"
                 >
-                  <span>Our Offerings</span>
+                  <div className="flex items-center gap-2">
+                    <Store size={18} aria-hidden="true" />
+                    <span>Our Offerings</span>
+                  </div>
                   <ChevronDown 
                     size={16} 
                     className={`transition-transform duration-200 ${activeDropdown === 'offerings' ? 'rotate-180' : ''}`} 
@@ -460,7 +465,10 @@ const Header = () => {
                   onClick={() => toggleDropdown('community')}
                   className="w-full flex items-center justify-between py-2 text-slate-700 hover:text-indigo-700"
                 >
-                  <span>Community</span>
+                  <div className="flex items-center gap-2">
+                    <Globe size={18} aria-hidden="true" />
+                    <span>Community</span>
+                  </div>
                   <ChevronDown 
                     size={16} 
                     className={`transition-transform duration-200 ${activeDropdown === 'community' ? 'rotate-180' : ''}`} 
