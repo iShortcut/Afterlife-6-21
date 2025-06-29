@@ -18,7 +18,7 @@ const Header = () => {
   const dropdownRefs = {
     dashboard: useRef<HTMLButtonElement>(null),
     offerings: useRef<HTMLButtonElement>(null),
-    community: useRef<HTMLButtonButtonElement>(null), // Corrected type for ref
+    community: useRef<HTMLButtonElement>(null), 
     profile: useRef<HTMLButtonElement>(null),
   };
 
@@ -88,8 +88,8 @@ const Header = () => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
     // Estimate dropdown width more realistically or use a fixed max-width that works
-    // Increased estimate as horizontal dropdowns can be wider
-    const dropdownContentWidth = 400; // Adjusted estimate for horizontal dropdowns
+    // Adjusted estimate for horizontal dropdowns, ensuring enough space
+    const dropdownContentWidth = 400; 
 
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
@@ -207,11 +207,8 @@ const Header = () => {
   };
 
   return (
-    <header ref={headerRef} className="bg-white shadow-sm sticky top-0 z-50"> {/* Assign headerRef */}
-      {/* Main header container: Adjusted to justify-start and added responsive gap for overall left shift */}
-      {/* gap-x-4 for medium screens, gap-x-12 for large screens to control spacing from Afterlife logo */}
+    <header ref={headerRef} className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-start md:gap-x-4 lg:gap-x-12"> 
-        {/* Afterlife Logo/Link (serves as Home) */}
         <Link
           to="/"
           className="flex items-center gap-2 text-xl font-serif tracking-wide text-indigo-900"
@@ -234,28 +231,29 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         {/* Adjusted gap between main nav items for better proportionality on different desktop sizes */}
+        {/* Changed justify-end to justify-between to spread items and prevent cutting off */}
         {/* Added flex-wrap and min-w-0 to nav to allow wrapping and prevent overflow on smaller desktop screens */}
-        <nav className="hidden md:flex items-center flex-grow justify-end gap-3 lg:gap-4 xl:gap-6 min-w-0 flex-wrap"> 
+        <nav className="hidden md:flex items-center flex-grow justify-between gap-3 lg:gap-4 xl:gap-6 min-w-0 flex-wrap"> 
           {user && (
-            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap"> {/* Added flex-shrink-0 and whitespace-nowrap */}
+            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap">
               Create Memorial
             </Link>
           )}
 
           {user && (
             <div
-              className="relative flex-shrink-0" // Added flex-shrink-0
+              className="relative flex-shrink-0"
               onMouseEnter={() => handleMouseEnterDropdown('dashboard')}
               onMouseLeave={handleMouseLeaveDropdown}
             >
               <button
-                ref={dropdownRefs.dashboard} // Assign ref
-                onClick={() => handleClickDropdownButton('dashboard')} // Use click handler
+                ref={dropdownRefs.dashboard}
+                onClick={() => handleClickDropdownButton('dashboard')}
                 className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('dashboard')}`} 
                 aria-expanded={activeDropdown === 'dashboard'}
                 aria-haspopup="true"
               >
-                <Settings size={18} aria-hidden="true" /> {/* Dashboard icon (existing) */}
+                <Settings size={18} aria-hidden="true" />
                 <span>Dashboard</span>
                 <ChevronDown
                   size={16}
@@ -272,7 +270,7 @@ const Header = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
-                    // Dynamic positioning: left-0 or right-0 based on available space
+                    // Adjusted max-w to be more flexible, using a percentage of viewport width
                     // Added conditional background for the entire dropdown wrapper
                     className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
@@ -282,7 +280,6 @@ const Header = () => {
                       <Link
                         key={item.path}
                         to={item.path}
-                        // Removed hover:bg-slate-100 to only change text/icon color on hover
                         className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                         role="menuitem"
                       >
@@ -297,19 +294,19 @@ const Header = () => {
           )}
           
           <div
-            className="relative flex-shrink-0" // Added flex-shrink-0
+            className="relative flex-shrink-0"
             onMouseEnter={() => handleMouseEnterDropdown('offerings')}
             onMouseLeave={handleMouseLeaveDropdown}
           >
             <button
-              ref={dropdownRefs.offerings} // Assign ref
-              onClick={() => handleClickDropdownButton('offerings')} // Use click handler
+              ref={dropdownRefs.offerings}
+              onClick={() => handleClickDropdownButton('offerings')}
               className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('offerings')}`} 
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
-              <Store size={18} aria-hidden="true" /> {/* Icon for Curated Memorials (existing Store icon used) */}
-              <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
+              <Store size={18} aria-hidden="true" />
+              <span>Curated Memorials</span>
               <ChevronDown
                 size={16}
                 className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
@@ -335,7 +332,6 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      // Removed hover:bg-slate-100 to only change text/icon color on hover
                       className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
@@ -349,18 +345,18 @@ const Header = () => {
           </div>
           
           <div
-            className="relative flex-shrink-0" // Added flex-shrink-0
+            className="relative flex-shrink-0"
             onMouseEnter={() => handleMouseEnterDropdown('community')}
             onMouseLeave={handleMouseLeaveDropdown}
           >
             <button
-              ref={dropdownRefs.community} // Assign ref
-              onClick={() => handleClickDropdownButton('community')} // Use click handler
+              ref={dropdownRefs.community}
+              onClick={() => handleClickDropdownButton('community')}
               className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('community')}`} 
               aria-expanded={activeDropdown === 'community'}
               aria-haspopup="true"
             >
-              <Globe size={18} aria-hidden="true" /> {/* Icon for Community (existing) */}
+              <Globe size={18} aria-hidden="true" />
               <span>Community</span>
               <ChevronDown
                 size={16}
@@ -387,7 +383,6 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      // Removed hover:bg-slate-100 to only change text/icon color on hover
                       className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
@@ -404,13 +399,13 @@ const Header = () => {
             <>
               {/* NotificationBell moved to the right of Profile */}
               <div
-                className="relative flex-shrink-0" // Added flex-shrink-0
+                className="relative flex-shrink-0"
                 onMouseEnter={() => handleMouseEnterDropdown('profile')}
                 onMouseLeave={handleMouseLeaveDropdown}
               > {/* Wrapper div for Profile dropdown */}
                 <button
-                  ref={dropdownRefs.profile} // Assign ref
-                  onClick={() => handleClickDropdownButton('profile')} // Use click handler
+                  ref={dropdownRefs.profile}
+                  onClick={() => handleClickDropdownButton('profile')}
                   className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('profile')}`} 
                   aria-expanded={activeDropdown === 'profile'}
                   aria-haspopup="true"
@@ -443,7 +438,6 @@ const Header = () => {
                           <button
                             key={index}
                             onClick={item.onClick}
-                            // Removed hover:bg-slate-100 to only change text/icon color on hover
                             className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} // Handle onClick items without path
                             role="menuitem"
                           >
@@ -454,7 +448,6 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            // Removed hover:bg-slate-100 to only change text/icon color on hover
                             className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`}
                             role="menuitem"
                           >
@@ -470,13 +463,13 @@ const Header = () => {
               
               <NotificationBell /> {/* Bell icon moved to after Profile dropdown */}
 
-              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0"> {/* Added flex-shrink-0 */}
+              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0">
                 <Key size={18} aria-hidden="true" />
                 <span>API</span>
               </Link>
               
               {isAdmin && (
-                <Link to="/admin" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0"> {/* Added flex-shrink-0 */}
+                <Link to="/admin" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0">
                   <Shield size={18} aria-hidden="true" />
                   <span>Admin</span>
                 </Link>
@@ -486,10 +479,10 @@ const Header = () => {
           
           {!user && (
             <>
-              <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0"> {/* Added flex-shrink-0 */}
+              <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0">
                 Sign In
               </Link>
-              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0"> {/* Added flex-shrink-0 */}
+              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0">
                 Create Account
               </Link>
             </>
@@ -504,7 +497,7 @@ const Header = () => {
             id="mobile-menu"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ opacity: 0, y: -10 }} // Corrected exit animation for mobile dropdowns
+            exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="md:hidden overflow-hidden bg-white border-t border-slate-100"
           >
@@ -539,7 +532,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ opacity: 0, y: -10 }} // Corrected exit animation for mobile dropdowns
+                        exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
