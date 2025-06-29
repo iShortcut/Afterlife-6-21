@@ -87,17 +87,29 @@ const Header = () => {
   const calculateDropdownPosition = useCallback(() => {
     const newPositions: { [key: string]: string } = {};
     const viewportWidth = window.innerWidth;
-    // Use a more appropriate fixed width for horizontal dropdowns
-    // Removed fixed width estimate, now relies on content + flex-wrap
-    const dropdownContentMinRequiredWidth = 200; // Minimum width for a single item row, if content is short
+    // Use a more dynamic check based on actual content width
+    const defaultDropdownWidth = 250; // A base width if scrollWidth is not immediately available
 
     for (const key in dropdownRefs) {
       const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
-      if (ref) {
+      if (ref && ref.nextElementSibling) {
+        const dropdownContentElement = ref.nextElementSibling as HTMLElement;
+        // Calculate actual width of the dropdown content, including padding and gap
+        // This is a more robust way to get the actual rendered width of the horizontal content
+        let actualDropdownContentWidth = 0;
+        if (dropdownContentElement.scrollWidth > 0) { // Check if element has rendered and has scrollWidth
+          actualDropdownContentWidth = dropdownContentElement.scrollWidth;
+        } else { // Fallback for initial render or if scrollWidth is not reliable
+          // Sum widths of children + gaps
+          Array.from(dropdownContentElement.children).forEach(child => {
+            actualDropdownContentWidth += child.getBoundingClientRect().width;
+          });
+          actualDropdownContentWidth += (Array.from(dropdownContentElement.children).length - 1) * 16; // Add gap-x-4 (16px) for each gap
+          actualDropdownContentWidth += 32; // Add padding p-4 (16px on each side)
+        }
+        
         const rect = ref.getBoundingClientRect();
         // If opening from left-0 would push it off the right edge
-        // Use a more dynamic check based on actual content width or a generous estimate
-        const actualDropdownContentWidth = ref.nextElementSibling?.scrollWidth || dropdownContentMinRequiredWidth; // Use actual scrollWidth if available
         if (rect.left + actualDropdownContentWidth > viewportWidth - 20) { // 20px buffer from right edge
           newPositions[key] = 'right-0'; // Align to the right
         } else {
@@ -273,7 +285,7 @@ const Header = () => {
                     // --- Horizontal Layout for Dropdown Content ---
                     // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                     // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} // Removed max-w, min-w-max, w-80
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -326,7 +338,7 @@ const Header = () => {
                   // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -375,7 +387,7 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  // Removed space-y-2 from here, ensuring flex-row is dominant
+                  // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
                   className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
@@ -430,10 +442,10 @@ const Header = () => {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                       // --- Horizontal Layout for Dropdown Content ---
-                      // Removed space-y-2 from here, ensuring flex-row is dominant
+                      // Removed fixed width (w-80) and min-w-max. Rely on flex-wrap within available space.
                       // Dynamic positioning: left-0 or right-0 based on available space
                       // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
