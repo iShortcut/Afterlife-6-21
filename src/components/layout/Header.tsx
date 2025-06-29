@@ -273,7 +273,7 @@ const Header = () => {
                     // Removed space-y-2 from here, ensuring flex-row is dominant
                     // Adjusted max-w to be more flexible, using a percentage of viewport width
                     // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -326,7 +326,7 @@ const Header = () => {
                   // Removed space-y-2 from here, ensuring flex-row is dominant
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -378,7 +378,7 @@ const Header = () => {
                   // Removed space-y-2 from here, ensuring flex-row is dominant
                   // Dynamic positioning: left-0 or right-0 based on available space
                   // Added conditional background for the entire dropdown wrapper
-                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
+                  className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -433,7 +433,7 @@ const Header = () => {
                       // Removed space-y-2 from here, ensuring flex-row is dominant
                       // Dynamic positioning: left-0 or right-0 based on available space
                       // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
