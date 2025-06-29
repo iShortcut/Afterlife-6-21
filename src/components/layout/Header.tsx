@@ -161,6 +161,15 @@ const Header = () => {
     return activeDropdown === dropdownName ? 'text-indigo-700 font-medium border-b-2 border-indigo-700' : '';
   };
 
+  // Helper to determine if a sub-menu item is active for highlighting
+  const isSubMenuItemActive = (itemPath: string) => {
+    // Check if the current location pathname matches the item's path
+    // For paths with query parameters, compare only the base path
+    const currentPath = location.pathname.split('?')[0];
+    const itemBasePath = itemPath.split('?')[0];
+    return currentPath === itemBasePath;
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       {/* Main header container: Adjusted to justify-start and added responsive gap for overall left shift */}
@@ -231,8 +240,8 @@ const Header = () => {
                       <Link
                         key={item.path}
                         to={item.path}
-                        // Adjusted padding and added whitespace-nowrap for horizontal items
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap" 
+                        // Added conditional styling for active sub-menu item
+                        className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
                         role="menuitem"
                       >
                         <item.icon size={16} aria-hidden="true" />
@@ -279,7 +288,8 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
+                      // Added conditional styling for active sub-menu item
+                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -325,7 +335,8 @@ const Header = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
+                      // Added conditional styling for active sub-menu item
+                      className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} 
                       role="menuitem"
                     >
                       <item.icon size={16} aria-hidden="true" />
@@ -375,7 +386,8 @@ const Header = () => {
                           <button
                             key={index}
                             onClick={item.onClick}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
+                            // Added conditional styling for active sub-menu item
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`} // Handle onClick items without path
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -385,7 +397,8 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap"
+                            // Added conditional styling for active sub-menu item
+                            className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                             role="menuitem"
                           >
                             <item.icon size={16} aria-hidden="true" />
@@ -434,7 +447,7 @@ const Header = () => {
             id="mobile-menu"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ opacity: 0, y: -10 }} // Corrected exit animation for mobile dropdowns
             transition={{ duration: 0.3 }}
             className="md:hidden overflow-hidden bg-white border-t border-slate-100"
           >
@@ -469,7 +482,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        exit={{ opacity: 0, y: -10 }} // Corrected exit animation for mobile dropdowns
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
@@ -477,7 +490,7 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
+                            className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                           >
                             <item.icon size={16} aria-hidden="true" />
                             <span>{item.label}</span>
@@ -518,7 +531,7 @@ const Header = () => {
                         <Link
                           key={item.path}
                           to={item.path}
-                          className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
+                          className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                         >
                           <item.icon size={16} aria-hidden="true" />
                           <span>{item.label}</span>
@@ -550,7 +563,7 @@ const Header = () => {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        exit={{ height: 0, opacity: 0 }} // Corrected exit animation for mobile dropdowns
                         transition={{ duration: 0.2 }}
                         className="pl-6 space-y-2 mt-2" 
                       >
@@ -558,7 +571,7 @@ const Header = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
+                            className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                           >
                             <item.icon size={16} aria-hidden="true" />
                             <span>{item.label}</span>
@@ -568,7 +581,8 @@ const Header = () => {
                     )}
                   </AnimatePresence>
                 </div>
-              );
+              {/* Removed the extra closing parenthesis and semicolon here */}
+
               {user && (
                 <div className="border-t border-slate-100 pt-2">
                   <button
@@ -600,7 +614,7 @@ const Header = () => {
                             <button
                               key={index}
                               onClick={item.onClick}
-                              className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 w-full text-left"
+                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 w-full text-left ${isSubMenuItemActive(item.path || '') ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                             >
                               <item.icon size={16} aria-hidden="true" />
                               <span>{item.label}</span>
@@ -609,7 +623,7 @@ const Header = () => {
                             <Link
                               key={item.path}
                               to={item.path}
-                              className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
+                              className={`flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700 ${isSubMenuItemActive(item.path) ? 'bg-indigo-50 text-indigo-700 font-semibold rounded-md' : ''}`}
                             >
                               <item.icon size={16} aria-hidden="true" />
                               <span>{item.label}</span>
