@@ -497,7 +497,7 @@ const Header = () => {
             id="mobile-menu"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
             className="md:hidden overflow-hidden bg-white border-t border-slate-100"
           >
