@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react'; // Added useRef and useCallback
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, BookHeart, User, Package, MessageCircle, Shield, Users, CreditCard, ShoppingBag, UserPlus, Key, Calendar, Settings, ChevronDown, Store, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +13,17 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Refs for dropdown buttons to measure their position
+  const dropdownRefs = {
+    dashboard: useRef<HTMLButtonElement>(null),
+    offerings: useRef<HTMLButtonElement>(null),
+    community: useRef<HTMLButtonElement>(null),
+    profile: useRef<HTMLButtonElement>(null),
+  };
+
+  // State to store dynamic dropdown positioning (left-0 or right-0)
+  const [dropdownPositions, setDropdownPositions] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -68,8 +79,43 @@ const Header = () => {
     setActiveDropdown(null);
   };
 
+  // Dynamic dropdown positioning logic
+  const calculateDropdownPosition = useCallback(() => {
+    const newPositions: { [key: string]: string } = {};
+    const viewportWidth = window.innerWidth;
+    const dropdownWidthEstimate = 300; // Estimate a reasonable max width for the dropdown content
+
+    for (const key in dropdownRefs) {
+      const ref = dropdownRefs[key as keyof typeof dropdownRefs].current;
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        // If opening from left-0 would push it off the right edge
+        if (rect.left + dropdownWidthEstimate > viewportWidth) {
+          newPositions[key] = 'right-0'; // Align to the right
+        } else {
+          newPositions[key] = 'left-0'; // Align to the left
+        }
+      }
+    }
+    setDropdownPositions(newPositions);
+  }, []);
+
+  useEffect(() => {
+    // Recalculate positions on mount and window resize
+    calculateDropdownPosition();
+    window.addEventListener('resize', calculateDropdownPosition);
+    return () => window.removeEventListener('resize', calculateDropdownPosition);
+  }, [calculateDropdownPosition]);
+
   const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+    setActiveDropdown(prevActiveDropdown => {
+      const nextActiveDropdown = prevActiveDropdown === dropdown ? null : dropdown;
+      // Recalculate position immediately when a dropdown is about to open
+      if (nextActiveDropdown) {
+        calculateDropdownPosition();
+      }
+      return nextActiveDropdown;
+    });
   };
 
   const dropdownMenus = {
@@ -153,6 +199,7 @@ const Header = () => {
           {user && (
             <div className="relative">
               <button
+                ref={dropdownRefs.dashboard} // Assign ref
                 onClick={() => toggleDropdown('dashboard')}
                 className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${getActiveDropdownClass('dashboard')}`}
                 aria-expanded={activeDropdown === 'dashboard'}
@@ -175,8 +222,8 @@ const Header = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     // --- Horizontal Layout for Dropdown Content ---
-                    // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
-                    className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
+                    // Dynamic positioning: left-0 or right-0 based on available space
+                    className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.dashboard}`} 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -200,6 +247,7 @@ const Header = () => {
           
           <div className="relative">
             <button
+              ref={dropdownRefs.offerings} // Assign ref
               onClick={() => toggleDropdown('offerings')}
               className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${getActiveDropdownClass('offerings')}`}
               aria-expanded={activeDropdown === 'offerings'}
@@ -222,8 +270,8 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
+                  // Dynamic positioning: left-0 or right-0 based on available space
+                  className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.offerings}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -245,6 +293,7 @@ const Header = () => {
           
           <div className="relative">
             <button
+              ref={dropdownRefs.community} // Assign ref
               onClick={() => toggleDropdown('community')}
               className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${getActiveDropdownClass('community')}`}
               aria-expanded={activeDropdown === 'community'}
@@ -267,8 +316,8 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   // --- Horizontal Layout for Dropdown Content ---
-                  // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
-                  className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
+                  // Dynamic positioning: left-0 or right-0 based on available space
+                  className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.community}`} 
                   role="menu"
                   aria-orientation="horizontal"
                 >
@@ -293,6 +342,7 @@ const Header = () => {
               {/* NotificationBell moved to the right of Profile */}
               <div className="relative"> {/* Wrapper div for Profile dropdown */}
                 <button
+                  ref={dropdownRefs.profile} // Assign ref
                   onClick={() => toggleDropdown('profile')}
                   className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 ${getActiveDropdownClass('profile')}`}
                   aria-expanded={activeDropdown === 'profile'}
@@ -315,9 +365,8 @@ const Header = () => {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                       // --- Horizontal Layout for Dropdown Content ---
-                      // Changed from right-0 to left-0 to shift it away from the Events widget
-                      // Added max-w-xs for smaller screens to prevent overflow, it will flex-wrap if content is too wide
-                      className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md" 
+                      // Dynamic positioning: left-0 or right-0 based on available space
+                      className={`absolute mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-xs sm:max-w-sm md:max-w-md ${dropdownPositions.profile}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -496,29 +545,30 @@ const Header = () => {
                   />
                 </button>
 
-                <AnimatePresence>
-                  {activeDropdown === 'community' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="pl-6 space-y-2 mt-2" 
-                    >
-                      {dropdownMenus.community.map((item) => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
-                        >
-                          <item.icon size={16} aria-hidden="true" />
-                          <span>{item.label}</span>
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                  <AnimatePresence>
+                    {activeDropdown === 'community' && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="pl-6 space-y-2 mt-2" 
+                      >
+                        {dropdownMenus.community.map((item) => (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            className="flex items-center gap-2 py-2 text-slate-600 hover:text-indigo-700"
+                          >
+                            <item.icon size={16} aria-hidden="true" />
+                            <span>{item.label}</span>
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {user && (
                 <div className="border-t border-slate-100 pt-2">
