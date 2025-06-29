@@ -248,7 +248,7 @@ const Header = () => {
               <button
                 ref={dropdownRefs.dashboard} // Assign ref
                 onClick={() => handleClickDropdownButton('dashboard')} // Use click handler
-                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('dashboard')}`} {/* Added flex-shrink-0 */}
+                className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('dashboard')}`} // Removed extra comment causing syntax error
                 aria-expanded={activeDropdown === 'dashboard'}
                 aria-haspopup="true"
               >
@@ -271,7 +271,7 @@ const Header = () => {
                     // --- Horizontal Layout for Dropdown Content ---
                     // Dynamic positioning: left-0 or right-0 based on available space
                     // Added conditional background for the entire dropdown wrapper
-                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} // max-w-screen-minus-padding
+                    className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
                   >
@@ -301,7 +301,7 @@ const Header = () => {
             <button
               ref={dropdownRefs.offerings} // Assign ref
               onClick={() => handleClickDropdownButton('offerings')} // Use click handler
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('offerings')}`} {/* Added flex-shrink-0 */}
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('offerings')}`} // Removed extra comment causing syntax error
               aria-expanded={activeDropdown === 'offerings'}
               aria-haspopup="true"
             >
@@ -353,7 +353,7 @@ const Header = () => {
             <button
               ref={dropdownRefs.community} // Assign ref
               onClick={() => handleClickDropdownButton('community')} // Use click handler
-              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('community')}`} {/* Added flex-shrink-0 */}
+              className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('community')}`} // Removed extra comment causing syntax error
               aria-expanded={activeDropdown === 'community'}
               aria-haspopup="true"
             >
@@ -408,7 +408,7 @@ const Header = () => {
                 <button
                   ref={dropdownRefs.profile} // Assign ref
                   onClick={() => handleClickDropdownButton('profile')} // Use click handler
-                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('profile')}`} {/* Added flex-shrink-0 */}
+                  className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 ${getActiveDropdownClass('profile')}`} // Removed extra comment causing syntax error
                   aria-expanded={activeDropdown === 'profile'}
                   aria-haspopup="true"
                 >
@@ -431,7 +431,7 @@ const Header = () => {
                       // --- Horizontal Layout for Dropdown Content ---
                       // Dynamic positioning: left-0 or right-0 based on available space
                       // Added conditional background for the entire dropdown wrapper
-                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
+                      className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} 
                       role="menu"
                       aria-orientation="horizontal"
                     >
@@ -501,7 +501,7 @@ const Header = () => {
             id="mobile-menu"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }} // Corrected exit animation for mobile dropdowns
+            exit={{ opacity: 0, y: -10 }} // Corrected exit animation for mobile dropdowns
             transition={{ duration: 0.3 }}
             className="md:hidden overflow-hidden bg-white border-t border-slate-100"
           >
