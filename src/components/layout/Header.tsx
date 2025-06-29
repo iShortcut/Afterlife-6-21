@@ -313,8 +313,8 @@ const Header = () => {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                       // --- Horizontal Layout for Dropdown Content ---
-                      // Adjusted right-0 to align dropdown to the right of the Profile button
-                      className="absolute right-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
+                      // Changed from right-0 to left-0 to shift it away from the Events widget
+                      className="absolute left-0 mt-2 bg-white rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 min-w-max" 
                       role="menu"
                       aria-orientation="horizontal"
                     >
