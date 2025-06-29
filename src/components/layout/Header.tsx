@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, BookHeart, User, Package, MessageCircle, Shield, Users, CreditCard, ShoppingBag, UserPlus, Key, Calendar, Settings, ChevronDown, Store, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -149,24 +149,24 @@ const Header = () => {
 
   const dropdownMenus = {
     dashboard: [
-      { label: 'Posts', path: '/dashboard?tab=posts', icon: BookHeart },
-      { label: 'Memorials', path: '/dashboard?tab=memorials', icon: Users },
-      { label: 'About', path: '/dashboard?tab=about', icon: User },
-      { label: 'Friends', path: '/dashboard?tab=friends', icon: UserPlus },
-      { label: 'Events', path: '/dashboard?tab=events', icon: Calendar },
-      { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle },
+        { label: 'Posts', path: '/dashboard?tab=posts', icon: BookHeart },
+        { label: 'Memorials', path: '/dashboard?tab=memorials', icon: Users },
+        { label: 'About', path: '/dashboard?tab=about', icon: User },
+        { label: 'Friends', path: '/dashboard?tab=friends', icon: UserPlus },
+        { label: 'Events', path: '/dashboard?tab=events', icon: Calendar },
+        { label: 'Media', path: '/dashboard?tab=media', icon: MessageCircle },
     ],
     offerings: [
-      { label: 'Services', path: '/services', icon: Package },
-      { label: 'Products', path: '/products', icon: Package },
-      { label: 'Subscription', path: '/subscription', icon: CreditCard },
-      { label: 'Memorial Store', path: '/store', icon: ShoppingBag },
+        { label: 'Services', path: '/services', icon: Package },
+        { label: 'Products', path: '/products', icon: Package },
+        { label: 'Subscription', path: '/subscription', icon: CreditCard },
+        { label: 'Memorial Store', path: '/store', icon: ShoppingBag },
     ],
     community: [
-      { label: 'Family members', path: '/family-members', icon: Users },
-      { label: 'Friends', path: '/find-friends', icon: UserPlus },
-      { label: 'Groups', path: '/groups', icon: Users },
-      { label: 'Shared', path: '/shared-memorials', icon: Users },
+        { label: 'Family members', path: '/family-members', icon: Users },
+        { label: 'Friends', path: '/find-friends', icon: UserPlus },
+        { label: 'Groups', path: '/groups', icon: Users },
+        { label: 'Shared', path: '/shared-memorials', icon: Users },
     ],
     profile: [
         { label: 'Profile Settings', path: '/profile-settings', icon: User },
@@ -174,7 +174,7 @@ const Header = () => {
         { label: 'Messages', path: '/chat', icon: MessageCircle },
         { label: 'Calendar', path: '/calendar/settings', icon: Calendar },
         { label: 'My Subscription', path: '/subscription', icon: CreditCard },
-        { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout' }, // Added a dummy path for key
+        { label: 'Sign Out', onClick: handleSignOut, icon: User, path: '/signout' },
     ],
   };
 
@@ -197,14 +197,14 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-start md:gap-x-4 lg:gap-x-12">
         <Link
           to="/"
-          className="flex items-center gap-2 text-xl font-serif tracking-wide text-indigo-900 flex-shrink-0"
+          // Responsive Text Added
+          className="flex items-center gap-2 font-serif tracking-wide text-indigo-900 flex-shrink-0 text-lg md:text-xl"
           aria-label="Afterlife"
         >
           <BookHeart size={28} className="text-indigo-700" aria-hidden="true" />
           <span className="font-medium">Afterlife</span>
         </Link>
 
-        {/* Mobile Menu Button - Corrected structure without extra div */}
         <div className="flex-grow flex justify-end md:hidden">
             <button
               className="p-2 text-slate-700 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md"
@@ -217,17 +217,17 @@ const Header = () => {
             </button>
         </div>
 
-
-        {/* Desktop Navigation - flex-wrap ensures responsiveness */}
         <nav className="hidden md:flex items-center flex-grow justify-start gap-4 lg:gap-6 xl:gap-8 min-w-0 flex-wrap">
           {user && (
-            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap">
+            // Responsive Text Added
+            <Link to="/create-memorial" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 whitespace-nowrap text-sm md:text-base">
               Create Memorial
             </Link>
           )}
 
             <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('dashboard')} onMouseLeave={handleMouseLeaveDropdown}>
-                <button ref={dropdownRefs.dashboard} onClick={() => handleClickDropdownButton('dashboard')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('dashboard')}`} aria-expanded={activeDropdown === 'dashboard'} aria-haspopup="true">
+                {/* Responsive Text Added */}
+                <button ref={dropdownRefs.dashboard} onClick={() => handleClickDropdownButton('dashboard')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap text-sm md:text-base ${getActiveDropdownClass('dashboard')}`} aria-expanded={activeDropdown === 'dashboard'} aria-haspopup="true">
                     <Settings size={18} aria-hidden="true" />
                     <span>Dashboard</span>
                     <ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('dashboard')}`} aria-hidden="true" />
@@ -236,7 +236,7 @@ const Header = () => {
                     {activeDropdown === 'dashboard' && (
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} role="menu" aria-orientation="horizontal">
                             {dropdownMenus.dashboard.map((item) => (
-                                <Link key={item.path} to={item.path} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
+                                <Link key={item.path} to={item.path} className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
                                     <item.icon size={16} aria-hidden="true" />
                                     <span>{item.label}</span>
                                 </Link>
@@ -247,7 +247,8 @@ const Header = () => {
             </div>
           
             <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('offerings')} onMouseLeave={handleMouseLeaveDropdown}>
-                <button ref={dropdownRefs.offerings} onClick={() => handleClickDropdownButton('offerings')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('offerings')}`} aria-expanded={activeDropdown === 'offerings'} aria-haspopup="true">
+                {/* Responsive Text Added */}
+                <button ref={dropdownRefs.offerings} onClick={() => handleClickDropdownButton('offerings')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap text-sm md:text-base ${getActiveDropdownClass('offerings')}`} aria-expanded={activeDropdown === 'offerings'} aria-haspopup="true">
                     <Store size={18} aria-hidden="true" />
                     <span>Curated Memorials</span>
                     <ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`} aria-hidden="true" />
@@ -256,7 +257,7 @@ const Header = () => {
                     {activeDropdown === 'offerings' && (
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.offerings} ${activeDropdown === 'offerings' ? 'bg-indigo-50' : 'bg-white'}`} role="menu" aria-orientation="horizontal">
                             {dropdownMenus.offerings.map((item) => (
-                                <Link key={item.path} to={item.path} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
+                                <Link key={item.path} to={item.path} className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
                                     <item.icon size={16} aria-hidden="true" />
                                     <span>{item.label}</span>
                                 </Link>
@@ -267,7 +268,8 @@ const Header = () => {
             </div>
           
             <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('community')} onMouseLeave={handleMouseLeaveDropdown}>
-                <button ref={dropdownRefs.community} onClick={() => handleClickDropdownButton('community')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('community')}`} aria-expanded={activeDropdown === 'community'} aria-haspopup="true">
+                {/* Responsive Text Added */}
+                <button ref={dropdownRefs.community} onClick={() => handleClickDropdownButton('community')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap text-sm md:text-base ${getActiveDropdownClass('community')}`} aria-expanded={activeDropdown === 'community'} aria-haspopup="true">
                     <Globe size={18} aria-hidden="true" />
                     <span>Community</span>
                     <ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('community')}`} aria-hidden="true" />
@@ -276,7 +278,7 @@ const Header = () => {
                     {activeDropdown === 'community' && (
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.community} ${activeDropdown === 'community' ? 'bg-indigo-50' : 'bg-white'}`} role="menu" aria-orientation="horizontal">
                             {dropdownMenus.community.map((item) => (
-                                <Link key={item.path} to={item.path} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
+                                <Link key={item.path} to={item.path} className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
                                     <item.icon size={16} aria-hidden="true" />
                                     <span>{item.label}</span>
                                 </Link>
@@ -289,7 +291,8 @@ const Header = () => {
           {user && (
             <>
                 <div className="relative" onMouseEnter={() => handleMouseEnterDropdown('profile')} onMouseLeave={handleMouseLeaveDropdown}>
-                    <button ref={dropdownRefs.profile} onClick={() => handleClickDropdownButton('profile')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap ${getActiveDropdownClass('profile')}`} aria-expanded={activeDropdown === 'profile'} aria-haspopup="true">
+                    {/* Responsive Text Added */}
+                    <button ref={dropdownRefs.profile} onClick={() => handleClickDropdownButton('profile')} className={`flex items-center gap-1 text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 whitespace-nowrap text-sm md:text-base ${getActiveDropdownClass('profile')}`} aria-expanded={activeDropdown === 'profile'} aria-haspopup="true">
                         <User size={18} aria-hidden="true" />
                         <span>Profile</span>
                         <ChevronDown size={16} className={`transition-transform duration-200 ${getArrowRotationClass('profile')}`} aria-hidden="true" />
@@ -299,12 +302,12 @@ const Header = () => {
                             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-x-4 gap-y-2 max-w-[calc(100vw-40px)] ${dropdownPositions.profile} ${activeDropdown === 'profile' ? 'bg-indigo-50' : 'bg-white'}`} role="menu" aria-orientation="horizontal">
                                 {dropdownMenus.profile.map((item) => (
                                     item.onClick ? (
-                                    <button key={item.label} onClick={item.onClick} className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap text-left" role="menuitem">
+                                    <button key={item.label} onClick={item.onClick} className="inline-flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap text-left" role="menuitem">
                                         <item.icon size={16} aria-hidden="true" />
                                         <span>{item.label}</span>
                                     </button>
                                     ) : (
-                                    <Link key={item.path} to={item.path!} className={`flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path!) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
+                                    <Link key={item.path} to={item.path!} className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-indigo-700 whitespace-nowrap ${isSubMenuItemActive(item.path!) ? 'bg-indigo-100 text-indigo-700 font-semibold rounded-md' : ''}`} role="menuitem">
                                         <item.icon size={16} aria-hidden="true" />
                                         <span>{item.label}</span>
                                     </Link>
@@ -317,13 +320,13 @@ const Header = () => {
               
               <NotificationBell />
 
-              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0">
+              <Link to="/developer/api" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0 text-sm md:text-base">
                 <Key size={18} aria-hidden="true" />
                 <span>API</span>
               </Link>
               
               {isAdmin && (
-                <Link to="/admin" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0">
+                <Link to="/admin" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex items-center gap-2 flex-shrink-0 text-sm md:text-base">
                   <Shield size={18} aria-hidden="true" />
                   <span>Admin</span>
                 </Link>
@@ -333,10 +336,12 @@ const Header = () => {
           
           {!user && (
             <>
-              <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0">
+              {/* Responsive Text Added */}
+              <Link to="/login" className="text-slate-700 hover:text-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1 flex-shrink-0 text-sm md:text-base">
                 Sign In
               </Link>
-              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0">
+              {/* Responsive Text Added */}
+              <Link to="/register" className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex-shrink-0 text-sm md:text-base">
                 Create Account
               </Link>
             </>
