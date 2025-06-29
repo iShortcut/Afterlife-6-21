@@ -18,7 +18,7 @@ const Header = () => {
   const dropdownRefs = {
     dashboard: useRef<HTMLButtonElement>(null),
     offerings: useRef<HTMLButtonElement>(null),
-    community: useRef<HTMLButtonElement>(null),
+    community: useRef<HTMLButtonButtonElement>(null), // Corrected type for ref
     profile: useRef<HTMLButtonElement>(null),
   };
 
@@ -274,7 +274,6 @@ const Header = () => {
                     // --- Horizontal Layout for Dropdown Content ---
                     // Dynamic positioning: left-0 or right-0 based on available space
                     // Added conditional background for the entire dropdown wrapper
-                    // Adjusted max-w to be more flexible, using a percentage of viewport width
                     className={`absolute mt-2 rounded-md shadow-lg z-10 p-4 flex flex-row flex-wrap gap-4 max-w-[calc(100vw-40px)] ${dropdownPositions.dashboard} ${activeDropdown === 'dashboard' ? 'bg-indigo-50' : 'bg-white'}`} 
                     role="menu"
                     aria-orientation="horizontal"
@@ -564,17 +563,17 @@ const Header = () => {
                 <button
                   onClick={() => toggleDropdown('offerings')}
                   className="w-full flex items-center justify-between py-2 text-slate-700 hover:text-indigo-700"
-                >
-                  <div className="flex items-center gap-2">
-                    <Store size={18} aria-hidden="true" />
-                    <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
-                    aria-hidden="true"
-                  />
-                </button>
+                  >
+                    <div className="flex items-center gap-2">
+                      <Store size={18} aria-hidden="true" />
+                      <span>Curated Memorials</span> {/* Changed text from Our Offerings */}
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${getArrowRotationClass('offerings')}`}
+                      aria-hidden="true"
+                    />
+                  </button>
 
                 <AnimatePresence>
                   {activeDropdown === 'offerings' && (
